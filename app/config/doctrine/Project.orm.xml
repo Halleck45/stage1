@@ -7,16 +7,6 @@
         </id>
         <field name="name" type="string" column="name" length="255" />
         <field name="slug" type="string" column="slug" length="255" />
-        <field name="githubId" type="integer" column="github_id" nullable="true" />
-        <field name="githubFullName" type="string" column="github_full_name" length="255" nullable="true" />
-        <field name="githubOwnerLogin" type="string" column="github_owner_login" length="255" nullable="true" />
-        <field name="githubHookId" type="integer" column="github_hook_id" nullable="true" />
-        <field name="githubDeployKeyId" type="integer" column="github_deploy_key_id" nullable="true" />
-        <field name="githubUrl" column="github_url" type="string" length="255" nullable="true" />
-        <field name="cloneUrl" type="string" column="clone_url" length="255" />
-        <field name="sshUrl" type="string" column="ssh_url" length="255" />
-        <field name="keysUrl" type="string" column="keys_url" length="255" />
-        <field name="hooksUrl" type="string" column="hooks_url" length="255" />
         <field name="createdAt" column="created_at" type="datetime" />
         <field name="updatedAt" column="updated_at" type="datetime" />
         <field name="lastBuildAt" column="last_build_at" type="datetime" nullable="true" />
@@ -29,10 +19,28 @@
         <field name="urls" column="urls" type="text" nullable="true" />
         <field name="domain" column="domain" type="string" length="255" nullable="true" />
 
+        <field name="fullName" column="full_name" type="string" length="255" nullable="true" />
+        <field name="isPrivate" column="is_private" type="boolean" nullable="true" />
+        <field name="providerName" column="provider_name" type="string" length="255" />
+        <field name="providerData" column="provider_data" type="array" nullable="true" />
+
         <!-- @todo make not nullable when everything has been migrated -->
         <field name="dockerBaseImage" column="docker_base_image" type="string" nullable="true" />
+
+        <!-- start github fields -->
         <field name="githubPrivate" column="github_private" type="boolean" nullable="true" />
         <field name="contentsUrl" type="string" column="contents_url" length="255" nullable="true" />
+        <field name="githubId" type="integer" column="github_id" nullable="true" />
+        <field name="githubFullName" type="string" column="github_full_name" length="255" nullable="true" />
+        <field name="githubOwnerLogin" type="string" column="github_owner_login" length="255" nullable="true" />
+        <field name="githubHookId" type="integer" column="github_hook_id" nullable="true" />
+        <field name="githubDeployKeyId" type="integer" column="github_deploy_key_id" nullable="true" />
+        <field name="githubUrl" column="github_url" type="string" length="255" nullable="true" />
+        <field name="cloneUrl" type="string" column="clone_url" length="255" />
+        <field name="sshUrl" type="string" column="ssh_url" length="255" />
+        <field name="keysUrl" type="string" column="keys_url" length="255" />
+        <field name="hooksUrl" type="string" column="hooks_url" length="255" />
+        <!-- end github fields -->
 
         <many-to-many field="users" target-entity="App\Model\User" inversed-by="projects">
             <join-table name="users_projects">

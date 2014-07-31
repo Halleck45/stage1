@@ -25,49 +25,12 @@ class ProjectHooksInstallCommand extends ContainerAwareCommand
     {
         $project = $this->findProject($input->getArgument('project_spec'));
 
-        $output->writeln('installing hooks for project <info>'.$project->getGithubFullName().'</info>');
+        $output->writeln('installing hooks for project <info>'.$project->getFullName().'</info>');
+        
+        $provider = $this->getContainer()->get('app_core.provider.factory')->getProvider($project);
 
-        if ($project->isDemo()) {
-            $config = Yaml::parse($this->getContainer()->getParameter('kernel.root_dir').'/config/demo.yml');
-            $accessToken = $config['access_token'];
-        } else {
-            $accessToken = $project->getUsers()->first()->getAccessToken();
-        }
-
-        $output->writeln('using access token <info>'.$accessToken.'</info>');
-
-        $client = $this->getContainer()->get('app_core.client.github');
-        $client->setDefaultOption('headers/Authorization', 'token '.$accessToken);
-        $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
-
-        $request = $client->get($project->getHooksUrl());
-        $response = $request->send();
-
-        $hooks = $response->json();
-
-        foreach ($hooks as $hook) {
-            if ($hook['name'] === 'web' && strpos($hook['config']['url'], 'stage1.io') !== false) {
-                $request = $client->delete($hook['url']);
-                $request->send();
-            }
-        }
-
-        $router = $this->getContainer()->get('router');
-        $githubHookUrl = $router->generate('app_core_hooks_github', [], true);
-        $githubHookUrl = str_replace('http://localhost', 'http://stage1.io', $githubHookUrl);
-
-        $request = $client->post($project->getHooksUrl());
-        $request->setBody(json_encode([
-            'name' => 'web',
-            'active' => true,
-            'events' => ['push', 'pull_request'],
-            'config' => ['url' => $githubHookUrl, 'content_type' => 'json'],
-        ]), 'application/json');
-
-        $response = $request->send();
-        $installedHook = $response->json();
-
-        $project->setGithubHookId($installedHook['id']);
+        $provider->clearHooks($project);
+        $provider->installHooks($project);
 
         $em = $this->getContainer()->get('doctrine')->getManager();
         $em->persist($project);

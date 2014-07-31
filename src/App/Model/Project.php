@@ -18,42 +18,19 @@ class Project implements WebsocketRoutable
 
     const STATUS_HOLD = 2;
 
-    /**
-     * @var integer
-     */
     protected $id;
 
-    /**
-     * @var string
-     */
     protected $name;
-
-    /**
-     * @var string
-     */
-    protected $cloneUrl;
 
     protected $slug;
 
-    protected $sshUrl;
+    protected $fullName;
 
-    protected $keysUrl;
+    protected $isPrivate;
 
-    protected $hooksUrl;
+    protected $providerName;
 
-    protected $contentsUrl;
-
-    protected $githubId;
-
-    protected $githubFullName;
-
-    protected $githubOwnerLogin;
-
-    protected $githubHookId;
-
-    protected $githubDeployKeyId;
-
-    protected $githubPrivate;
+    protected $providerData;
 
     protected $builds;
 
@@ -89,10 +66,35 @@ class Project implements WebsocketRoutable
 
     protected $domain;
 
-    /**
-     * @var string
-     */
+    protected $organization;
+
+    /** start github fields */
+
+    protected $cloneUrl;
+
+    protected $sshUrl;
+
+    protected $keysUrl;
+
+    protected $hooksUrl;
+
+    protected $contentsUrl;
+
+    protected $githubId;
+
+    protected $githubFullName;
+
+    protected $githubOwnerLogin;
+
+    protected $githubHookId;
+
+    protected $githubDeployKeyId;
+
+    protected $githubPrivate;
+
     protected $githubUrl;
+
+    /** end GitHub fields */
 
     public function getDefaultBuildOptions()
     {
@@ -229,8 +231,6 @@ SSH;
         return $this;
     }
 
-
-
     /**
      * @return string
      */
@@ -239,6 +239,7 @@ SSH;
         return 'auth:'.$this->getSlug();
     }
 
+    /** @todo */
     public function getGitUrl()
     {
         if ($this->getGithubPrivate()) {
@@ -335,29 +336,6 @@ SSH;
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * Set cloneUrl
-     *
-     * @param string $cloneUrl
-     * @return Project
-     */
-    public function setCloneUrl($cloneUrl)
-    {
-        $this->cloneUrl = $cloneUrl;
-    
-        return $this;
-    }
-
-    /**
-     * Get cloneUrl
-     *
-     * @return string 
-     */
-    public function getCloneUrl()
-    {
-        return $this->cloneUrl;
     }
 
     /**
@@ -496,121 +474,6 @@ SSH;
     }
 
     /**
-     * Set githubFullName
-     *
-     * @param string $githubFullName
-     * @return Project
-     */
-    public function setGithubFullName($githubFullName)
-    {
-        $this->githubFullName = $githubFullName;
-    
-        return $this;
-    }
-
-    /**
-     * Get githubFullName
-     *
-     * @return string 
-     */
-    public function getGithubFullName()
-    {
-        return $this->githubFullName;
-    }
-
-    /**
-     * Set githubOwnerLogin
-     *
-     * @param string $githubOwnerLogin
-     * @return Project
-     */
-    public function setGithubOwnerLogin($githubOwnerLogin)
-    {
-        $this->githubOwnerLogin = $githubOwnerLogin;
-    
-        return $this;
-    }
-
-    /**
-     * Get githubOwnerLogin
-     *
-     * @return string 
-     */
-    public function getGithubOwnerLogin()
-    {
-        return $this->githubOwnerLogin;
-    }
-
-    /**
-     * Set githubHookId
-     *
-     * @param integer $githubHookId
-     * @return Project
-     */
-    public function setGithubHookId($githubHookId)
-    {
-        $this->githubHookId = $githubHookId;
-    
-        return $this;
-    }
-
-    /**
-     * Get githubHookId
-     *
-     * @return integer 
-     */
-    public function getGithubHookId()
-    {
-        return $this->githubHookId;
-    }
-
-    /**
-     * Set githubDeployKeyId
-     *
-     * @param integer $githubDeployKeyId
-     * @return Project
-     */
-    public function setGithubDeployKeyId($githubDeployKeyId)
-    {
-        $this->githubDeployKeyId = $githubDeployKeyId;
-    
-        return $this;
-    }
-
-    /**
-     * Get githubDeployKeyId
-     *
-     * @return integer 
-     */
-    public function getGithubDeployKeyId()
-    {
-        return $this->githubDeployKeyId;
-    }
-
-    /**
-     * Set githubId
-     *
-     * @param integer $githubId
-     * @return Project
-     */
-    public function setGithubId($githubId)
-    {
-        $this->githubId = $githubId;
-    
-        return $this;
-    }
-
-    /**
-     * Get githubId
-     *
-     * @return integer 
-     */
-    public function getGithubId()
-    {
-        return $this->githubId;
-    }
-
-    /**
      * Set publicKey
      *
      * @param string $publicKey
@@ -654,29 +517,6 @@ SSH;
     public function getPrivateKey()
     {
         return $this->privateKey;
-    }
-
-    /**
-     * Set sshUrl
-     *
-     * @param string $sshUrl
-     * @return Project
-     */
-    public function setSshUrl($sshUrl)
-    {
-        $this->sshUrl = $sshUrl;
-    
-        return $this;
-    }
-
-    /**
-     * Get sshUrl
-     *
-     * @return string 
-     */
-    public function getSshUrl()
-    {
-        return $this->sshUrl;
     }
 
     /**
@@ -843,52 +683,6 @@ SSH;
     }
 
     /**
-     * Set keysUrl
-     *
-     * @param string $keysUrl
-     * @return Project
-     */
-    public function setKeysUrl($keysUrl)
-    {
-        $this->keysUrl = $keysUrl;
-    
-        return $this;
-    }
-
-    /**
-     * Get keysUrl
-     *
-     * @return string 
-     */
-    public function getKeysUrl()
-    {
-        return $this->keysUrl;
-    }
-
-    /**
-     * Set hooksUrl
-     *
-     * @param string $hooksUrl
-     * @return Project
-     */
-    public function setHooksUrl($hooksUrl)
-    {
-        $this->hooksUrl = $hooksUrl;
-    
-        return $this;
-    }
-
-    /**
-     * Get hooksUrl
-     *
-     * @return string 
-     */
-    public function getHooksUrl()
-    {
-        return $this->hooksUrl;
-    }
-
-    /**
      * Set status
      *
      * @param integer $status
@@ -990,52 +784,6 @@ SSH;
     }
 
     /**
-     * Set githubPrivate
-     *
-     * @param boolean $githubPrivate
-     * @return Project
-     */
-    public function setGithubPrivate($githubPrivate)
-    {
-        $this->githubPrivate = $githubPrivate;
-    
-        return $this;
-    }
-
-    /**
-     * Get githubPrivate
-     *
-     * @return boolean 
-     */
-    public function getGithubPrivate()
-    {
-        return $this->githubPrivate;
-    }
-
-    /**
-     * Set githubUrl
-     *
-     * @param string $githubUrl
-     * @return Project
-     */
-    public function setGithubUrl($githubUrl)
-    {
-        $this->githubUrl = $githubUrl;
-    
-        return $this;
-    }
-
-    /**
-     * Get githubUrl
-     *
-     * @return string 
-     */
-    public function getGithubUrl()
-    {
-        return $this->githubUrl;
-    }
-
-    /**
      * Set urls
      *
      * @param string $urls
@@ -1056,29 +804,6 @@ SSH;
     public function getUrls()
     {
         return $this->urls;
-    }
-
-    /**
-     * Set contentsUrl
-     *
-     * @param string $contentsUrl
-     * @return Project
-     */
-    public function setContentsUrl($contentsUrl)
-    {
-        $this->contentsUrl = $contentsUrl;
-    
-        return $this;
-    }
-
-    /**
-     * Get contentsUrl
-     *
-     * @return string 
-     */
-    public function getContentsUrl()
-    {
-        return $this->contentsUrl;
     }
 
     /**
@@ -1103,11 +828,6 @@ SSH;
     {
         return $this->settings;
     }
-    /**
-     * @var \App\Model\Organization
-     */
-    private $organization;
-
 
     /**
      * Set organization
@@ -1163,5 +883,340 @@ SSH;
     public function getPullRequests()
     {
         return $this->pullRequests;
+    }
+
+    /**
+     * Set fullName
+     *
+     * @param string $fullName
+     * @return Project
+     */
+    public function setFullName($fullName)
+    {
+        $this->fullName = $fullName;
+    
+        return $this;
+    }
+
+    /**
+     * Set providerName
+     *
+     * @param string $providerName
+     * @return Project
+     */
+    public function setProviderName($providerName)
+    {
+        $this->providerName = $providerName;
+    
+        return $this;
+    }
+
+    /**
+     * Get providerName
+     *
+     * @return string 
+     */
+    public function getProviderName()
+    {
+        return $this->providerName;
+    }
+
+    /**
+     * Set providerData
+     *
+     * @param array $providerData
+     * @return Project
+     */
+    public function setProviderData($providerData)
+    {
+        $this->providerData = $providerData;
+    
+        return $this;
+    }
+
+    /**
+     * Get providerData
+     *
+     * @return array 
+     */
+    public function getProviderData()
+    {
+        return $this->providerData;
+    }
+
+    /**
+     * Set githubPrivate
+     *
+     * @param boolean $githubPrivate
+     * @return Project
+     */
+    public function setGithubPrivate($githubPrivate)
+    {
+        $this->githubPrivate = $githubPrivate;
+    
+        return $this;
+    }
+
+    /**
+     * Get githubPrivate
+     *
+     * @return boolean 
+     */
+    public function getGithubPrivate()
+    {
+        return $this->githubPrivate;
+    }
+
+    /**
+     * Set contentsUrl
+     *
+     * @param string $contentsUrl
+     * @return Project
+     */
+    public function setContentsUrl($contentsUrl)
+    {
+        $this->contentsUrl = $contentsUrl;
+    
+        return $this;
+    }
+
+    /**
+     * Get contentsUrl
+     *
+     * @return string 
+     */
+    public function getContentsUrl()
+    {
+        return $this->contentsUrl;
+    }
+
+    /**
+     * Set githubId
+     *
+     * @param integer $githubId
+     * @return Project
+     */
+    public function setGithubId($githubId)
+    {
+        $this->githubId = $githubId;
+    
+        return $this;
+    }
+
+    /**
+     * Get githubId
+     *
+     * @return integer 
+     */
+    public function getGithubId()
+    {
+        return $this->githubId;
+    }
+
+    /**
+     * Set githubFullName
+     *
+     * @param string $githubFullName
+     * @return Project
+     */
+    public function setGithubFullName($githubFullName)
+    {
+        $this->githubFullName = $githubFullName;
+    
+        return $this;
+    }
+
+    /**
+     * Get githubFullName
+     *
+     * @return string 
+     */
+    public function getGithubFullName()
+    {
+        return $this->githubFullName;
+    }
+
+    /**
+     * Set githubOwnerLogin
+     *
+     * @param string $githubOwnerLogin
+     * @return Project
+     */
+    public function setGithubOwnerLogin($githubOwnerLogin)
+    {
+        $this->githubOwnerLogin = $githubOwnerLogin;
+    
+        return $this;
+    }
+
+    /**
+     * Get githubOwnerLogin
+     *
+     * @return string 
+     */
+    public function getGithubOwnerLogin()
+    {
+        return $this->githubOwnerLogin;
+    }
+
+    /**
+     * Set githubHookId
+     *
+     * @param integer $githubHookId
+     * @return Project
+     */
+    public function setGithubHookId($githubHookId)
+    {
+        $this->githubHookId = $githubHookId;
+    
+        return $this;
+    }
+
+    /**
+     * Get githubHookId
+     *
+     * @return integer 
+     */
+    public function getGithubHookId()
+    {
+        return $this->githubHookId;
+    }
+
+    /**
+     * Set githubDeployKeyId
+     *
+     * @param integer $githubDeployKeyId
+     * @return Project
+     */
+    public function setGithubDeployKeyId($githubDeployKeyId)
+    {
+        $this->githubDeployKeyId = $githubDeployKeyId;
+    
+        return $this;
+    }
+
+    /**
+     * Get githubDeployKeyId
+     *
+     * @return integer 
+     */
+    public function getGithubDeployKeyId()
+    {
+        return $this->githubDeployKeyId;
+    }
+
+    /**
+     * Set githubUrl
+     *
+     * @param string $githubUrl
+     * @return Project
+     */
+    public function setGithubUrl($githubUrl)
+    {
+        $this->githubUrl = $githubUrl;
+    
+        return $this;
+    }
+
+    /**
+     * Get githubUrl
+     *
+     * @return string 
+     */
+    public function getGithubUrl()
+    {
+        return $this->githubUrl;
+    }
+
+    /**
+     * Set cloneUrl
+     *
+     * @param string $cloneUrl
+     * @return Project
+     */
+    public function setCloneUrl($cloneUrl)
+    {
+        $this->cloneUrl = $cloneUrl;
+    
+        return $this;
+    }
+
+    /**
+     * Get cloneUrl
+     *
+     * @return string 
+     */
+    public function getCloneUrl()
+    {
+        return $this->cloneUrl;
+    }
+
+    /**
+     * Set sshUrl
+     *
+     * @param string $sshUrl
+     * @return Project
+     */
+    public function setSshUrl($sshUrl)
+    {
+        $this->sshUrl = $sshUrl;
+    
+        return $this;
+    }
+
+    /**
+     * Get sshUrl
+     *
+     * @return string 
+     */
+    public function getSshUrl()
+    {
+        return $this->sshUrl;
+    }
+
+    /**
+     * Set keysUrl
+     *
+     * @param string $keysUrl
+     * @return Project
+     */
+    public function setKeysUrl($keysUrl)
+    {
+        $this->keysUrl = $keysUrl;
+    
+        return $this;
+    }
+
+    /**
+     * Get keysUrl
+     *
+     * @return string 
+     */
+    public function getKeysUrl()
+    {
+        return $this->keysUrl;
+    }
+
+    /**
+     * Set hooksUrl
+     *
+     * @param string $hooksUrl
+     * @return Project
+     */
+    public function setHooksUrl($hooksUrl)
+    {
+        $this->hooksUrl = $hooksUrl;
+    
+        return $this;
+    }
+
+    /**
+     * Get hooksUrl
+     *
+     * @return string 
+     */
+    public function getHooksUrl()
+    {
+        return $this->hooksUrl;
     }
 }

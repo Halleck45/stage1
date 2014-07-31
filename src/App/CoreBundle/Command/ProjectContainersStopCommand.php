@@ -25,7 +25,7 @@ class ProjectContainersStopCommand extends ContainerAwareCommand
     {
         $project = $this->findProject($input->getArgument('project_spec'));
 
-        $output->writeln('found project <info>'.$project->getGithubFullName().'</info>');
+        $output->writeln('found project <info>'.$project->getFullName().'</info>');
 
         $docker = $this->getContainer()->get('app_core.docker');
         $em = $this->getContainer()->get('doctrine')->getManager();

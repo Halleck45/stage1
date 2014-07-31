@@ -18,12 +18,8 @@ class ProjectController extends Controller
 
         $em->flush();
 
-        $client = $this->get('app_core.client.github');
-        $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
-        $client->setDefaultOption('headers/Authorization', 'token '.$project->getUsers()->first()->getAccessToken());
-
-        $request = $client->post('/repos/'.$project->getGithubFullName().'/hooks/'.$project->getGithubHookId().'/tests');
-        $response = $request->send();
+        $provider = $this->get('app_core.provider.factory')->getProvider($project);
+        $provider->triggerWebHook($project);
 
         return $this->redirect($this->generateUrl('app_admin_dashboard'));
     }

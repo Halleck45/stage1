@@ -27,16 +27,16 @@ class ProjectAccessResetCommand extends ContainerAwareCommand
         $rp = $em->getRepository('Model:Project');
 
         if ($input->getOption('public')) {
-            $projects = $rp->findByGithubPrivate(false);
+            $projects = $rp->findByIsPrivate(false);
         } else {
             $projects = $rp->findAll();
         }
 
         foreach ($projects as $project) {
-            $output->writeln('reset access list for project <info>'.$project->getGithubFullName().'</info>');
+            $output->writeln('reset access list for project <info>'.$project->getFullName().'</info>');
             $redis->del($project->getAccessList());
 
-            if ($project->getGithubPrivate()) {
+            if ($project->getIsPrivate()) {
                 $redis->sadd($project->getAccessList(), '0.0.0.0');
             }
         }

@@ -81,7 +81,7 @@ class ContainerListCommand extends ContainerAwareCommand
             if (null === $build->getProject()) {
                 $projectName = '';
             } else {
-                $projectName = $build->getProject()->getGithubFullName();
+                $projectName = $build->getProject()->getFullName();
             }
 
             if (null !== $projectFilter && false === strpos($projectName, $projectFilter)) {

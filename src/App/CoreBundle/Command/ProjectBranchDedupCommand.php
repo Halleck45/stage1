@@ -45,7 +45,7 @@ class ProjectBranchDedupCommand extends ContainerAwareCommand
 
         foreach ($projects as $project) {
             $branches = [];
-            $output->writeln('inspecting project <info>'.$project->getGithubFullName().'</info>');
+            $output->writeln('inspecting project <info>'.$project->getFullName().'</info>');
             
             foreach ($project->getBranches() as $branch) {
                 if (isset($branches[$branch->getName()])) {

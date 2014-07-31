@@ -35,8 +35,8 @@ class ProjectAuditCommand extends ContainerAwareCommand
         }
 
         $infos['name'] = $project->getFullName();
-        $infos['github_id'] = $project->getGithubId();
-        $infos['private'] = $project->getGithubPrivate();
+        $infos['private'] = $project->getIsPrivate();
+        $infos['provider_data'] = $project->getProviderData();
         $infos['users'] = $project->getUsers()->map(function($user) { return $user->getUsername(); })->toArray();
         $infos['branches'] = $project->getBranches()->map(function($branch) { return $branch->getName(); })->toArray();
 
@@ -46,40 +46,11 @@ class ProjectAuditCommand extends ContainerAwareCommand
             'building' => count($project->getBuildingBuilds()),
         );
 
-        $accessToken = $project->getUsers()->first()->getAccessToken();
+        $provider = $this->getContainer()->get('app_core.provider.factory')->getProvider($project);
 
-        $output->writeln('Using access token <info>'.$accessToken.'</info>');
-
-        $client = $this->getContainer()->get('app_core.client.github');
-        $client->setDefaultOption('headers/Authorization', 'token '.$accessToken);
-        $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
-
-        $response = $client->get($project->getKeysUrl())->send();
-
-        $infos['has_deploy_key'] = 0;
-
-        foreach ($response->json() as $githubKey) {
-            if ($githubKey['key'] === $project->getPublicKey()) {
-                $infos['has_deploy_key']++;
-            }
-        }
-
-        $response = $client->get($project->getHooksUrl())->send();
-
-        $infos['has_hook'] = 0;
-        $infos['has_pr_hook'] = 0;
-
-        foreach ($response->json() as $githubHook) {
-            if ($githubHook['name'] === 'web' && strpos($githubHook['config']['url'], 'stage1.io') !== false) {
-                $infos['has_hook']++;
-
-                foreach ($githubHook['events'] as $event) {
-                    if ($event === 'pull_request') {
-                        $infos['has_pr_hook']++;
-                    }
-                }
-            }
-        }
+        $infos['has_deploy_key'] = $provider->countDeployKeys($project);
+        $infos['has_hook'] = $project->countPushHooks($project);
+        $infos['has_pr_hook'] = $project->countPullRequests($project);
 
         $infos['tokens'] = [];
 

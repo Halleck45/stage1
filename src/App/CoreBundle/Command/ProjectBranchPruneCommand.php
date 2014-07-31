@@ -42,42 +42,21 @@ class ProjectBranchPruneCommand extends ContainerAwareCommand
             $projects = [$project];            
         }
 
-        $github = $this->getContainer()->get('app_core.client.github');
-        $github->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
+        $providerFactory = $this->getContainer()->get('app_core.provider.factory');
 
         foreach ($projects as $project) {
-            $output->writeln('inspecting project <info>'.$project->getGithubFullName().'</info>');
+            $output->writeln('inspecting project <info>'.$project->getFullName().'</info>');
+            $provider = $providerFactory->getProvider($project);
 
-            $accessToken = $project->getUsers()->first()->getAccessToken();
-            $output->writeln('  - using access token <info>'.$accessToken.'</info>');
+            $existingBranches = $provider->getBranches($project);
 
-            $github->setDefaultOption('headers/Authorization', 'token '.$accessToken);
-
-            try {
-                $request = $github->get(['/repos/{owner}/{name}/branches', [
-                    'owner' => $project->getGithubOwnerLogin(),
-                    'name' => $project->getName(),
-                ]]);
-
-                $response = $request->send();
-                $existingBranches = array_map(function($branch) { return $branch['name']; }, $response->json());
-
-                foreach ($project->getActiveBranches() as $branch) {
-                    if (false === array_search($branch->getName(), $existingBranches)) {
-                        $output->writeln('  - marking branch <info>'.$branch->getName().'</info> as deleted');
-                        $branch->setDeleted(true);
-                        $em->persist($branch);
-                    }
+            foreach ($project->getActiveBranches() as $branch) {
+                if (false === array_search($branch->getName(), $existingBranches)) {
+                    $output->writeln('  - marking branch <info>'.$branch->getName().'</info> as deleted');
+                    $branch->setDeleted(true);
+                    $em->persist($branch);
                 }
-            } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-                if ($e->getResponse()->getStatusCode() === 404) {
-                    // repository might have been deleted, continue
-                    continue;
-                }
-
-                throw $e;
             }
-
         }
 
         if ($input->getOption('force')) {

@@ -57,9 +57,9 @@ class ProjectBranchSetDomainCommand extends ContainerAwareCommand
         $em->flush();
 
         if ($input->getOption('unset')) {
-            $output->writeln('<info>unset</info> static domain for branch <info>'.$project->getGithubFullName().':'.$branch->getName().'</info>');
+            $output->writeln('<info>unset</info> static domain for branch <info>'.$project->getFullName().':'.$branch->getName().'</info>');
         } else {
-            $output->writeln('<info>set</info> static domain <info>'.$input->getArgument('domain').'</info> for branch <info>'.$project->getGithubFullName().':'.$branch->getName().'</info>');
+            $output->writeln('<info>set</info> static domain <info>'.$input->getArgument('domain').'</info> for branch <info>'.$project->getFullName().':'.$branch->getName().'</info>');
         }
     }
 }

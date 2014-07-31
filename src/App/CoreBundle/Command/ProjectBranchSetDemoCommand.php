@@ -48,9 +48,9 @@ class ProjectBranchSetDemoCommand extends ContainerAwareCommand
         $em->flush();
 
         if ($isDemo) {
-            $output->writeln('<info>set</info> demo status for branch <info>'.$project->getGithubFullName().':'.$branch->getName().'</info>');
+            $output->writeln('<info>set</info> demo status for branch <info>'.$project->getFullName().':'.$branch->getName().'</info>');
         } else {
-            $output->writeln('<info>unset</info> demo status for branch <info>'.$project->getGithubFullName().':'.$branch->getName().'</info>');
+            $output->writeln('<info>unset</info> demo status for branch <info>'.$project->getFullName().':'.$branch->getName().'</info>');
         }
     }
 }

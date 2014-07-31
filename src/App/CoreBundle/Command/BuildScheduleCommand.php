@@ -34,43 +34,11 @@ class BuildScheduleCommand extends ContainerAwareCommand
             throw new InvalidArgumentException('project not found');
         }
 
-        $ref = $input->getArgument('ref');
-        // $hash = $this->getHashFromRef($project, $ref);
-        $hash = null;
-
         $build = $this
             ->getContainer()
             ->get('app_core.build_scheduler')
-            ->schedule($project, $ref, $hash);
+            ->schedule($project, $input->getArgument('ref'), null);
 
         $output->writeln('scheduled build <info>'.$build->getId().'</info>');
-    }
-
-    protected function getHashFromRef(Project $project, $ref)
-    {
-        $accessToken = $project->getUsers()->first()->getAccessToken();
-
-        $this->getContainer()->get('logger')->info('using access token '.$accessToken);
-
-        $client = $this->getContainer()->get('app_core.client.github');
-        $client->setDefaultOption('headers/Authorization', 'token '.$accessToken);
-        $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
-
-        $request = $client->get(['/repos/{owner}/{repo}/git/refs/heads', [
-            'owner' => $project->getGithubOwnerLogin(),
-            'repo' => $project->getName(),
-        ]]);
-
-        $response = $request->send();
-        $remoteRefs = $response->json();
-
-        foreach ($remoteRefs as $remoteRef) {
-            if ('refs/heads/'.$ref === $remoteRef['ref']) {
-                $hash = $remoteRef['object']['sha'];
-                break;
-            }
-        }
-
-        return $hash;
     }
 }

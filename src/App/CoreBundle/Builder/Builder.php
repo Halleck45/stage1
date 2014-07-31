@@ -123,7 +123,7 @@ class Builder
 
         $logger->info('starting build', [
             'build' => $build->getId(),
-            'project' => $project->getGithubFullName(),
+            'project' => $project->getFullName(),
             'project_id' => $project->getId(),
             'ref' => $build->getRef(),
             'hash' => $build->getHash(),
@@ -238,7 +238,7 @@ class Builder
          * Launch App container
          */
         $logger->info('starting app container', [
-            'project' => $build->getProject()->getGithubFullName(),
+            'project' => $build->getProject()->getFullName(),
             'image' => $build->getImageName(),
         ]);
 

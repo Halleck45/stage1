@@ -107,8 +107,8 @@ class DefaultStrategy
             $logger->info('enabling composer global cache', ['build' => $build->getId()]);
             $hostConfig['Binds'] = [$this->getOption('composer_cache_path').'/global:/.composer/cache'];
         } elseif ($this->getOption('composer_enable_project_cache')) {
-            $cachePath = $this->getOption('composer_cache_path').'/'.$project->getGithubFullName();
-            $logger->info('enabling composer project cache', ['build' => $build->getId(), 'project' => $project->getGithubFullName(), 'cache_path' => $cachePath]);
+            $cachePath = $this->getOption('composer_cache_path').'/'.$project->getFullName();
+            $logger->info('enabling composer project cache', ['build' => $build->getId(), 'project' => $project->getFullName(), 'cache_path' => $cachePath]);
 
             if (!is_dir($cachePath)) {
                 mkdir($cachePath, 0777, true);

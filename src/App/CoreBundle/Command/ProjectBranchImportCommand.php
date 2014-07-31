@@ -26,27 +26,19 @@ class ProjectBranchImportCommand extends ContainerAwareCommand
         $project = $this->findProject($input->getArgument('project_spec'));
         $branches = $project->getBranches()->map(function($branch) { return $branch->getName(); })->toArray();
 
-        $client = $this->getContainer()->get('app_core.client.github');
-        $client->setDefaultOption('headers/Authorization', 'token '.$project->getUsers()->first()->getAccessToken());
+        $provider = $this->getContainer()->get('app_core.provider.factory')->getProvider($project);
 
-        $request = $client->get(['/repos/{owner}/{repo}/branches', [
-            'owner' => $project->getGithubOwnerLogin(),
-            'repo' => $project->getName(),
-        ]]);
+        foreach ($provider->getBranches($project) as $name) {
 
-        $response = $request->send();
-
-        foreach ($response->json() as $data) {
-
-            if (array_search($data['name'], $branches) !== false) {
-                $output->writeln('skipping existing branch <info>'.$data['name'].'</info>');
+            if (array_search($name, $branches) !== false) {
+                $output->writeln('skipping existing branch <info>'.$name.'</info>');
                 continue;
             }
 
-            $output->writeln('importing branch <info>'.$data['name'].'</info>');
+            $output->writeln('importing branch <info>'.$name.'</info>');
 
             $branch = new Branch();
-            $branch->setName($data['name']);
+            $branch->setName($name);
             
             $branch->setProject($project);
             $project->addBranch($branch);
