@@ -103,33 +103,7 @@ class User extends BaseUser implements Serializable
         $this->setUsername($data[1]);
     }
 
-    // public function getRoles()
-    // {
-    //     $roles = ['ROLE_USER'];
-
-    //     if (in_array($this->getUsername(), array('ubermuda', 'pocky'))) {
-    //         $roles[] = 'ROLE_ADMIN';
-    //         $roles[] = 'ROLE_DEMO';
-    //     }
-
-    //     return $roles;
-    // }
-
-    public function getPassword()
-    {
-        return null;
-    }
-
-    public function getSalt()
-    {
-        return null;
-    }
-
-    public function eraseCredentials()
-    {
-        return true;
-    }
-
+    /** @todo github refactoring */
     static public function fromGithubResponse(array $response)
     {
         $user = new static();
