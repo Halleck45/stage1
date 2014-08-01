@@ -19,14 +19,12 @@
     <div class="row-fluid masthead">
         <div class="container">            
             <ul class="nav nav-pills pull-right">
-                {# <li class="active"><a href="{{ path('app_core_homepage') }}">Home</a></li> #}
-                {#<li><a href="{{ path('app_core_blog') }}">Blog</a></li>#}
                 <li><a href="http://stage1.io/blog/">Blog</a></li>
                 <li><a href="http://help.stage1.io/">Help</a></li>
+                
                 {% if not app.user or not is_granted('ROLE_USER') %}
-                <li><a href="{{ path('app_core_auth_github_authorize') }}"><i class="fa fa-github"></i> Login</a></li>
+                <li><a href="{{ path('fos_user_security_login') }}">Login</a></li>
                 {% endif %}
-                {# <li><a href="{{ path('app_core_demo') }}">Demo</a><li> #}
             </ul>
 
             <ul class="nav nav-pills">

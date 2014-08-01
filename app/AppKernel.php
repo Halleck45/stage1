@@ -18,6 +18,7 @@ class AppKernel extends Kernel
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
             new Norzechowicz\AceEditorBundle\NorzechowiczAceEditorBundle(),
+            new FOS\UserBundle\FOSUserBundle(),
             
             new App\CoreBundle\AppCoreBundle(),
             new App\AdminBundle\AppAdminBundle(),

@@ -32,12 +32,6 @@ class SecurityController extends Controller
         return (null !== $repo->findByBetaKey($betaKey));
     }
 
-    /**
-     * @todo
-     * 
-     * Right now this implementation allows anyone to subscribe to any channel
-     * just by "asking" for it.
-     */
     public function primusAuthAction(Request $request)
     {
         try {
@@ -73,6 +67,8 @@ class SecurityController extends Controller
 
     /**
      * @return User
+     * 
+     * @deprecated
      */
     private function registerGithubUser(Request $request, $accessToken, $scope)
     {
@@ -263,13 +259,5 @@ class SecurityController extends Controller
         }
 
         return $this->redirect($redirectUrl);
-    }
-
-    public function logoutAction()
-    {
-        $this->get('security.context')->setToken(null);
-        $this->get('request')->getSession()->invalidate();
-
-        return $this->redirect($this->generateUrl('app_core_homepage'));
     }
 }

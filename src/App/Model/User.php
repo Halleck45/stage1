@@ -2,9 +2,12 @@
 
 namespace App\Model;
 
+use FOS\UserBundle\Entity\User as BaseUser;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class User implements UserInterface, \Serializable
+use Serializable;
+
+class User extends BaseUser implements Serializable
 {
     const STATUS_DISABLED = 0;
 
@@ -18,17 +21,11 @@ class User implements UserInterface, \Serializable
 
     protected $githubId;
 
-    protected $username;
-
-    protected $email;
-
     protected $accessToken;
 
     protected $createdAt;
 
     protected $updatedAt;
-
-    protected $lastLoginAt;
 
     protected $projects;
 
@@ -46,11 +43,23 @@ class User implements UserInterface, \Serializable
 
     protected $betaSignup;
 
-    protected $roles = [];
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct();
 
+        $this->projects = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->roles = [];
+    }
+
+    /**
+     * @return string
+     */
     public function __toString()
     {
-        return (string) $this->username;
+        return (string) $this->getUsername();
     }
 
     public function hasPrivateProjects()
@@ -160,52 +169,6 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Set username
-     *
-     * @param string $username
-     * @return User
-     */
-    public function setUsername($username)
-    {
-        $this->username = $username;
-    
-        return $this;
-    }
-
-    /**
-     * Get username
-     *
-     * @return string 
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
-
-    /**
-     * Set email
-     *
-     * @param string $email
-     * @return User
-     */
-    public function setEmail($email)
-    {
-        $this->email = $email;
-    
-        return $this;
-    }
-
-    /**
-     * Get email
-     *
-     * @return string 
-     */
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    /**
      * Set accessToken
      *
      * @param string $accessToken
@@ -282,37 +245,6 @@ class User implements UserInterface, \Serializable
     public function getUpdatedAt()
     {
         return $this->updatedAt;
-    }
-
-    /**
-     * Set lastLoginAt
-     *
-     * @param \DateTime $lastLoginAt
-     * @return User
-     */
-    public function setLastLoginAt($lastLoginAt)
-    {
-        $this->lastLoginAt = $lastLoginAt;
-    
-        return $this;
-    }
-
-    /**
-     * Get lastLoginAt
-     *
-     * @return \DateTime 
-     */
-    public function getLastLoginAt()
-    {
-        return $this->lastLoginAt;
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->projects = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->roles = [];
     }
 
     /**
@@ -523,61 +455,5 @@ class User implements UserInterface, \Serializable
     public function getBetaSignup()
     {
         return $this->betaSignup;
-    }
-
-    /**
-     * Set roles
-     *
-     * @param array $roles
-     * @return User
-     */
-    public function setRoles($roles)
-    {
-        $this->roles = $roles;
-    
-        return $this;
-    }
-
-    /**
-     * Add a role
-     * 
-     * @param string $role
-     * @return User
-     */
-    public function addRole($role)
-    {
-        $this->roles[] = $role;
-        $this->roles = array_unique($this->roles);
-
-        return $this;
-    }
-
-    /**
-     * Remove a role
-     * 
-     * @param string $role
-     * @return User
-     */
-    public function removeRole($role)
-    {
-        if (false !== $index = array_search($role, $this->roles)) {
-            unset($this->roles[$index]);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Get roles
-     *
-     * @return array 
-     */
-    public function getRoles($raw = false)
-    {
-        if (null === $this->roles && !$raw) {
-            return ['ROLE_USER'];
-        }
-
-        return $this->roles;
     }
 }
