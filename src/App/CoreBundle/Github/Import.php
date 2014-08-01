@@ -20,7 +20,7 @@ use Redis;
 
 class Import
 {
-    private $loggerInterface;
+    private $logger;
 
     private $client;
 
