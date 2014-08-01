@@ -31,7 +31,7 @@ class ProjectFixProviderCommand extends ContainerAwareCommand
             }
         }
 
-        // $manager->flush();
+        $manager->flush();
     }
 
     private function fixProvider(OutputInterface $output, Project $project)
