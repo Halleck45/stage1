@@ -3,7 +3,6 @@
 namespace App\CoreBundle\Controller;
 
 use App\Model\User;
-use App\CoreBundle\SshKeys;
 use App\Model\BetaSignup;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -86,8 +85,10 @@ class SecurityController extends Controller
             $user->setStatus(User::STATUS_WAITING_LIST);
 
             // @todo generate random websocket channel name
+            $keys = $this
+                ->get('app_core.ssh_keys_generator')
+                ->generate();
 
-            $keys = SshKeys::generate();
             $user->setPublicKey($keys['public']);
             $user->setPrivateKey($keys['private']);
         }

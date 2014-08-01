@@ -6,9 +6,9 @@ use Symfony\Component\Process\ProcessBuilder;
 use App\Model\Project;
 use RuntimeException;
 
-class SshKeys
+class SshKeysGenerator
 {
-    static public function dump(Project $project, $file = null)
+    public function dump(Project $project, $file = null)
     {
         if (null === $file) {
             $file = tempnam(sys_get_temp_dir(), 'build-ssh-keys-');
@@ -20,7 +20,7 @@ class SshKeys
         return $file;
     }
 
-    static public function generate($comment = '')
+    public function generate($comment = '')
     {
         $private = tempnam(sys_get_temp_dir(), 'ssh-keygen-');
         $public  = $private.'.pub';

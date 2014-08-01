@@ -7,7 +7,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-use App\CoreBundle\SshKeys;
 use InvalidArgumentException;
 
 class BuildDumpKeysCommand extends ContainerAwareCommand
@@ -31,7 +30,10 @@ class BuildDumpKeysCommand extends ContainerAwareCommand
             throw new InvalidArgumentException('Could not find build');
         }
 
-        $file = SshKeys::dump($build->getProject(), $input->getOption('file'));
+        $file = $this
+            ->getContainer()
+            ->get('app_core.ssh_keys_generator')
+            ->dump($build->getProject(), $input->getOption('file'));
 
         $output->writeln($file);
     }

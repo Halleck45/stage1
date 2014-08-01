@@ -18,13 +18,15 @@
         <parameter key="app_core.builder.class">App\CoreBundle\Builder\Builder</parameter>
         <parameter key="app_core.quota.per_user_running_builds.class">App\CoreBundle\Quota\PerUserRunningBuildsQuota</parameter>
         <parameter key="app_core.scheduler.rabbitmq.class">App\CoreBundle\Scheduler\RabbitMqScheduler</parameter>
+        <parameter key="app_core.ssh_keys_generator.class">App\CoreBundle\SshKeysGenerator</parameter>
     </parameters>
 
     <services>
         <!-- misc services -->
-        <service id="app_core.stopwatch" class="%app_core.stopwatch.class%" />
-
         <service id="app_core.scheduler" alias="app_core.scheduler.rabbitmq" />
+
+        <service id="app_core.stopwatch" class="%app_core.stopwatch.class%" />
+        <service id="app_core.ssh_keys_generator" class="%app_core.ssh_keys_generator.class%" />
 
         <service id="app_core.scheduler.rabbitmq" class="%app_core.scheduler.rabbitmq.class%">
             <argument type="service" id="logger" />
@@ -98,6 +100,7 @@
             <argument type="service" id="doctrine" />
             <argument type="service" id="app_core.redis" />
             <argument type="service" id="router" />
+            <argument type="service" id="app_core.ssh_keys_generator" />
             
             <tag name="monolog.logger" channel="build" />
 

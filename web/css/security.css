@@ -1,0 +1,28 @@
+#wrapper-outer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: table;
+}
+
+#wrapper-inner {
+    display: table-cell;
+    vertical-align: middle;    
+}
+
+#wrapper-form {
+    width: 200px;
+    margin: auto;
+}
+
+#wrapper-form h1 {
+    text-align: center;
+}
+
+#wrapper-form form input {
+    width: 100%;
+}
+
+#wrapper-form form div.actions {
+    text-align: center;
+}

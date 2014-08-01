@@ -23,9 +23,17 @@
         <parameter key="app_core.subscriber.hipache_routing_table.class">App\CoreBundle\EventListener\HipacheRoutingTableSubscriber</parameter>
         <parameter key="app_core.subscriber.entity_channel.class">App\CoreBundle\EventListener\EntityChannelSubscriber</parameter>
         <parameter key="app_core.subscriber.timestampable.class">App\CoreBundle\EventListener\TimestampableSubscriber</parameter>
+
+        <parameter key="app_core.subscriber.user.generate_ssh_keys.class">App\CoreBundle\EventListener\User\GenerateSshKeysSubscriber</parameter>
     </parameters>
 
     <services>
+
+        <service id="app_core.subscriber.user.generate_ssh_keys" class="%app_core.subscriber.user.generate_ssh_keys.class%">
+            <argument type="service" id="logger" />
+            <argument type="service" id="app_core.ssh_keys_generator" />
+            <tag name="doctrine.event_subscriber" connection="default" />
+        </service>
 
         <!-- build listeners -->
         <service id="app_core.listener.build.build_routing" class="%app_core.listener.build.build_routing.class%">

@@ -6,7 +6,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Guzzle\Http\Client;
-use App\CoreBundle\SshKeys;
+use App\CoreBundle\SshKeysGenerator;
 use App\Model\User;
 use App\Model\Project;
 use App\Model\ProjectSettings;
@@ -32,6 +32,8 @@ class Import
 
     private $router;
 
+    private $sshKeysGenerator;
+
     private $accessToken;
 
     private $initialProjectAccess;
@@ -44,13 +46,14 @@ class Import
 
     private $delete_old_keys = false;
 
-    public function __construct(LoggerInterface $logger, Client $client, RegistryInterface $doctrine, Redis $redis, Router $router)
+    public function __construct(LoggerInterface $logger, Client $client, RegistryInterface $doctrine, Redis $redis, Router $router, SshKeysGenerator $sshKeysGenerator)
     {
         $this->logger = $logger;
         $this->client = $client;
         $this->doctrine = $doctrine;
         $this->redis = $redis;
         $this->router = $router;
+        $this->sshKeysGenerator = $sshKeysGenerator;
 
         $this->client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
     }
@@ -241,7 +244,7 @@ class Import
 
             if (null === $org = $rp->findOneByName($infos['organization']['login'])) {
                 $this->logger->info('organization not found, creating', ['organization' => $infos['organization']['login']]);
-                $orgKeys = SshKeys::generate();
+                $orgKeys = $this->sshKeysGenerator->generate();
 
                 $org = new Organization();
                 $org->setName($infos['organization']['login']);
@@ -263,7 +266,7 @@ class Import
 
     private function doKeys(Project $project)
     {
-        $keys = SshKeys::generate();
+        $keys = $this->sshKeysGenerator->generate();
 
         $project->setPublicKey($keys['public']);
         $project->setPrivateKey($keys['private']);

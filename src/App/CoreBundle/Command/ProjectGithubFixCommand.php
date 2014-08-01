@@ -5,7 +5,6 @@ namespace App\CoreBundle\Command;
 use App\Model\Project;
 use App\Model\ProjectSettings;
 use App\Model\Organization;
-use App\CoreBundle\SshKeys;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -69,7 +68,10 @@ class ProjectGithubFixCommand extends ContainerAwareCommand
             if (null === $project->getOrganization() && isset($githubInfos['organization'])) {
                 $output->writeln('fixing organization for <info>'.$project->getFullName().'</info>');
 
-                $orgKeys = SshKeys::generate();
+                $orgKeys = $this
+                    ->getContainer()
+                    ->get('app_core.ssh_keys_generator')
+                    ->generate();
 
                 $org = new Organization();
                 $org->setName($githubInfos['organization']['login']);

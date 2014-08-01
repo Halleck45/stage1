@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}STAGE1{% endblock %}</title>
+    {% stylesheets output="assets/public.css"
+        'css/vendor/*'
+        'css/security.css'
+        'css/stage1.css'
+        'css/public.css'
+    %}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+</head>
+<body>
+    <div id="wrapper-outer">
+        <div id="wrapper-inner">
+            <div id="wrapper-form">
+                <h1>STAGE1</h1>
+                <hr />
+                {% block fos_user_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
