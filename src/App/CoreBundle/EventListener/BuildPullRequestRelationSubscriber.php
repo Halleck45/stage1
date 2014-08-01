@@ -2,12 +2,13 @@
 
 namespace App\CoreBundle\EventListener;
 
-use Symfony\Bridge\Doctrine\RegistryInterface;
-use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\Common\EventSubscriber;
+use App\CoreBundle\Provider\ProviderFactory;
 use App\Model\Build;
 use App\Model\PullRequest;
+use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Psr\Log\LoggerInterface;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 
 class BuildPullRequestRelationSubscriber implements EventSubscriber
 {

@@ -32,6 +32,9 @@ class Project implements WebsocketRoutable
 
     protected $providerName;
 
+    /**
+     * @var array
+     */
     protected $providerData;
 
     protected $builds;
@@ -934,7 +937,7 @@ SSH;
     public function setProviderData($providerData, $value = null)
     {
         if (null !== $value) {
-            $this->providerData[$key] = $providerData;
+            $this->providerData[$providerData] = $value;
         } else {
             $this->providerData = $providerData;
         }
@@ -1236,5 +1239,28 @@ SSH;
     public function getHooksUrl()
     {
         return $this->hooksUrl;
+    }
+
+    /**
+     * Set isPrivate
+     *
+     * @param boolean $isPrivate
+     * @return Project
+     */
+    public function setIsPrivate($isPrivate)
+    {
+        $this->isPrivate = $isPrivate;
+    
+        return $this;
+    }
+
+    /**
+     * Get isPrivate
+     *
+     * @return boolean 
+     */
+    public function getIsPrivate()
+    {
+        return $this->isPrivate;
     }
 }

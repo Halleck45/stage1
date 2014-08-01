@@ -258,7 +258,7 @@ class GitHubProvider
         ]), 'application/json');
 
         $response = $request->send();
-        $installedHook = $response->json()
+        $installedHook = $response->json();
 
         $providerData = $project->setProviderData('hook_id', $installedHook['id']);
     }

@@ -16,11 +16,11 @@ class Controller extends BaseController
     /**
      * @return string
      */
-    protected function getHashFromRef(Project $project, $ref, $accessToken = null)
+    protected function getHashFromRef(Project $project, $ref)
     {
         $provider = $this->get('app_core.provider.factory')->getProvider($project);
 
-        return $provider->getHashFromRef($project);
+        return $provider->getHashFromRef($project, $ref);
     }
 
     /**
