@@ -32,7 +32,7 @@ class WebsocketRoutingRebuildCommand extends ContainerAwareCommand
             $key = 'channel:routing:'.$user->getChannel();
 
             foreach ($user->getProjects() as $project) {
-                $output->writeln('adding project <info>'.$project->getGithubFullName().'</info>');
+                $output->writeln('adding project <info>'.$project->getFullName().'</info>');
                 $redis->sadd($key, $project->getChannel());
             }
         }

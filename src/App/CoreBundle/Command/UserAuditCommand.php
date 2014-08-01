@@ -40,7 +40,7 @@ class UserAuditCommand extends ContainerAwareCommand
         $infos['projects'] = [];
 
         foreach ($user->getProjects() as $project) {
-            $infos['projects'][] = $project->getGithubFullName();
+            $infos['projects'][] = $project->getFullName();
         }
 
         $content = Yaml::dump($infos, 10);

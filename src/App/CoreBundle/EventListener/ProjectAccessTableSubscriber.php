@@ -31,7 +31,7 @@ class ProjectAccessTableSubscriber implements EventSubscriber
             return;
         }
 
-        if (!$project->getGithubPrivate()) {
+        if (!$project->getIsPrivate()) {
             return;
         }
 

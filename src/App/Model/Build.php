@@ -101,9 +101,6 @@ class Build implements WebsocketRoutable
 
     private $builderHost = null;
 
-    /**
-     * @var \App\Model\GithubPayload
-     */
     private $payload;
 
     public function __construct()
@@ -154,15 +151,6 @@ class Build implements WebsocketRoutable
     public function getRoutingKey()
     {
         return $this->getBuilderHost();
-    }
-
-    public function getPullRequestHead()
-    {
-        $project = $this->getProject();
-
-        list($name,) = explode('/', $project->getGithubFullName());
-
-        return $name.':'.$this->getRef();
     }
 
     public function getLogsList()

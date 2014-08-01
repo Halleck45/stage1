@@ -7,20 +7,17 @@ use App\Model\Build;
 use Guzzle\Http\Client;
 use Psr\Log\LoggerInterface;
 
-/**
- * Marks a previous build for a same ref obsolete
- */
 class PullRequestListener
 {
     /**
-     * @var Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var Guzzle\Http\Client
+     * @var ProviderFactory
      */
-    private $github;
+    private $providerFactory;
 
     /**
      * @var boolean
@@ -29,15 +26,13 @@ class PullRequestListener
 
     /**
      * @param LoggerInterface   $logger
-     * @param Client        $github
+     * @param ProviderFactory   $providerFactory
      * @param Docker\Docker
      */
-    public function __construct(LoggerInterface $logger, Client $github, $enabled)
+    public function __construct(LoggerInterface $logger, ProviderFactory $providerFactory, $enabled)
     {
-        $github->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
-
         $this->logger = $logger;
-        $this->github = $github;
+        $this->providerFactory = $providerFactory;
         $this->enabled = $enabled;
 
         $logger->info('initialized '.__CLASS__);
@@ -56,29 +51,8 @@ class PullRequestListener
         }
 
         $project = $build->getProject();
+        $provider = $this->providerFactory->getProvider($project);
 
-        $this->github->setDefaultOption('headers/Authorization', 'token '.$project->getUsers()->first()->getAccessToken());
-        $request = $this->github->get(['/repos/'.$project->getGithubFullName().'/pulls{?data*}', [
-            'state' => 'open',
-            'head' => str_replace('/', ':', $build->getPullRequestHead())
-        ]]);
-
-        $response = $request->send();
-
-        foreach ($response->json() as $pr) {
-            $this->logger->info('sending pull request comment', [
-                'build' => $build->getId(),
-                'project' => $project->getGithubFullNAme(),
-                'pr' => $pr['number'],
-                'pr_url' => $pr['html_url']
-            ]);
-
-            $commentRequest = $this->github->post($pr['comments_url']);
-            $commentRequest->setBody(json_encode([
-                'body' => 'Stage1 build finished, url: '.$build->getUrl(),
-            ]));
-
-            $commentRequest->send();
-        }
+        $provider->sendPullRequestComment($project, $build);
     }
 }

@@ -49,8 +49,8 @@ class ProjectAuditCommand extends ContainerAwareCommand
         $provider = $this->getContainer()->get('app_core.provider.factory')->getProvider($project);
 
         $infos['has_deploy_key'] = $provider->countDeployKeys($project);
-        $infos['has_hook'] = $project->countPushHooks($project);
-        $infos['has_pr_hook'] = $project->countPullRequests($project);
+        $infos['has_hook'] = $provider->countPushHooks($project);
+        $infos['has_pr_hook'] = $provider->countPullRequests($project);
 
         $infos['tokens'] = [];
 

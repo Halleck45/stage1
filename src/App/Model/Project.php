@@ -7,6 +7,8 @@ use Docker\Context\ContextBuilder;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+use InvalidArgumentException;
+
 /**
  * Project
  */
@@ -924,12 +926,18 @@ SSH;
     /**
      * Set providerData
      *
-     * @param array $providerData
+     * @param array|string $providerData
+     * @param mixed $value
+     * 
      * @return Project
      */
-    public function setProviderData($providerData)
+    public function setProviderData($providerData, $value = null)
     {
-        $this->providerData = $providerData;
+        if (null !== $value) {
+            $this->providerData[$key] = $providerData;
+        } else {
+            $this->providerData = $providerData;
+        }
     
         return $this;
     }
@@ -937,10 +945,20 @@ SSH;
     /**
      * Get providerData
      *
-     * @return array 
+     * @param string|null $key
+     * 
+     * @return array|mixed 
      */
-    public function getProviderData()
+    public function getProviderData($key = null)
     {
+        if (null !== $key) {
+            if (array_key_exists($key, $this->providerData)) {
+                return $this->providerData[$key];
+            }
+
+            throw new InvalidArgumentException('Unknown provider data key "'.$key.'"');
+        }
+
         return $this->providerData;
     }
 

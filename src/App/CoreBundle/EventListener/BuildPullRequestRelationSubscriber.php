@@ -12,23 +12,30 @@ use Psr\Log\LoggerInterface;
 class BuildPullRequestRelationSubscriber implements EventSubscriber
 {
     /**
-     * @var Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var Symfony\Bridge\Doctrine\RegistryInterface
+     * @var RegistryInterface
      */
     private $doctrine;
 
     /**
-     * @param LoggerInterface                   $logger
-     * @param RegistryInterface $doctrine
+     * @var ProviderFactory
      */
-    public function __construct(LoggerInterface $logger, RegistryInterface $doctrine)
+    private $providerFactory;
+
+    /**
+     * @param LoggerInterface   $logger
+     * @param RegistryInterface $doctrine
+     * @param ProviderFactory   $providerFactory
+     */
+    public function __construct(LoggerInterface $logger, RegistryInterface $doctrine, ProviderFactory $providerFactory)
     {
         $this->logger = $logger;
         $this->doctrine = $doctrine;
+        $this->providerFactory = $providerFactory;
     }
 
     /**
@@ -65,8 +72,9 @@ class BuildPullRequestRelationSubscriber implements EventSubscriber
                 'ref' => $build->getRef()
             ]);
 
-            $pr = PullRequest::fromGithubPayload($build->getPayload());
-            $pr->setProject($build->getProject());
+            $provider = $this->providerFactory->getProvider($build->getProject());
+            $pr = $provider->createPullRequestFromPayload($build->getPayload());
+            
             $em->persist($pr);
         }
 

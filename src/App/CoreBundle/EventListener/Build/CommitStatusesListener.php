@@ -3,25 +3,23 @@
 namespace App\CoreBundle\EventListener\Build;
 
 use App\CoreBundle\Event\BuildFinishedEvent;
+use App\CoreBundle\Provider\ProviderFactory;
 use App\Model\Build;
-use Guzzle\Http\Client;
 use Psr\Log\LoggerInterface;
+
 use Exception;
 
-/**
- * Marks a previous build for a same ref obsolete
- */
 class CommitStatusesListener
 {
     /**
-     * @var Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var Guzzle\Http\Client
+     * @var ProviderFactory
      */
-    private $github;
+    private $providerFactory;
 
     /**
      * @var boolean
@@ -30,16 +28,13 @@ class CommitStatusesListener
 
     /**
      * @param LoggerInterface   $logger
-     * @param Client        $github
-     * @param Docker\Docker
+     * @param ProviderFactory   $providerFactory
+     * @param boolean           $enabled
      */
-    public function __construct(LoggerInterface $logger, Client $github, $enabled)
+    public function __construct(LoggerInterface $logger, ProviderFactory $providerFactory, $enabled)
     {
-        // $github->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
-        $github->setDefaultOption('headers/Accept', 'application/vnd.github.she-hulk-preview+json');
-
         $this->logger = $logger;
-        $this->github = $github;
+        $this->providerFactory = $providerFactory;
         $this->enabled = $enabled;
 
         $logger->info('initialized '.__CLASS__);
@@ -54,6 +49,7 @@ class CommitStatusesListener
         $build = $event->getBuild();
 
         if (!$build->isRunning()) {
+            $this->logger->info('skipping commit status for non-running build');
             return;
         }
 
@@ -63,35 +59,8 @@ class CommitStatusesListener
         }
 
         $project = $build->getProject();
+        $provider = $this->providerFactory->getProvider($project);
 
-        $this->github->setDefaultOption('headers/Authorization', 'token '.$project->getUsers()->first()->getAccessToken());
-
-        $request = $this->github->post(['/repos/'.$project->getGithubFullName().'/statuses/{sha}', [
-            'sha' => $build->getHash(),
-        ]]);
-
-        $request->setBody(json_encode([
-            'state' => 'success',
-            'target_url' => $build->getUrl(),
-            'description' => 'Stage1 instance ready',
-            'context' => 'stage1',
-        ]));
-
-        $this->logger->info('sending commit status', [
-            'build' => $build->getId(),
-            'project' => $project->getGithubFullNAme(),
-            'sha' => $build->getHash(),
-        ]);
-
-        try {
-            $request->send();
-        } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-            $this->logger->error('error sending commit status', [
-                'exception_class' => get_class($e),
-                'exception_message' => $e->getMessage(),
-                'url' => $e->getRequest()->getUrl(),
-                'response' => (string) $e->getResponse()->getBody(),
-            ]);
-        }
+        $provider->setCommitStatus($project, $build, 'success');
     }
 }

@@ -326,6 +326,7 @@ class ProjectController extends Controller
         return new JsonResponse(json_encode($projects));
     }
 
+    /** @todo github provider refactoring */
     public function joinAction(Request $request, $id)
     {
         $project = $this->getDoctrine()->getRepository('Model:Project')->find($id);
@@ -334,12 +335,8 @@ class ProjectController extends Controller
             throw $this->createNotFoundException();
         }
 
-        $client = $this->get('app_core.client.github');
-        $client->setDefaultOption('headers/Authorization', 'token '.$this->getUser()->getAccessToken());
-
-        $request = $client->get(['/repos/{owner}/{repo}/collaborators', ['owner' => $project->getGithubOwnerLogin(), 'repo' => $project->getName()]]);
-        $response = $request->send();
-        $users = $response->json();
+        $provider = $this->get('app_core.provider.factory')->getProvider($project);
+        $users = $provider->getCollaborators($project);
 
         foreach ($users as $user) {
             if ($user['id'] === $this->getUser()->getGithubId()) {
@@ -442,7 +439,7 @@ class ProjectController extends Controller
 
         $project = $this->findProject($id);
 
-        if (!$project->getGithubPrivate()) {
+        if (!$project->getIsPrivate()) {
             return $this->redirect($this->generateUrl('app_core_project_branches', ['id' => $project->getId()]));
         }
 

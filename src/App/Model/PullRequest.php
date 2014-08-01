@@ -22,6 +22,8 @@ class PullRequest
 
     protected $builds;
 
+    protected $url;
+
     /** not persisted **/
 
     protected $lastBuild;
@@ -49,15 +51,12 @@ class PullRequest
         return false;
     }
 
-    public function getHashFromRef()
-    {
-    }
-
     public function getDomain()
     {
         return sprintf('pr-%d.%s', $this->getNumber(), $this->getProject()->getDomain());
     }
 
+    /** @deprecated */
     public function getGithubUrl()
     {
         return vsprintf('https://github.com/%s/%s/pull/%d', [
@@ -65,19 +64,6 @@ class PullRequest
             $this->getProject()->getName(),
             $this->getNumber()
         ]);
-    }
-
-    static public function fromGithubPayload(GithubPayload $payload)
-    {
-        $json = $payload->getParsedPayload();
-
-        $obj = new static();
-        $obj->setNumber($json->number);
-        $obj->setTitle($json->pull_request->title);
-        $obj->setRef(sprintf('pull/%d/head', $json->number));
-        $obj->setOpen(true);
-
-        return $obj;
     }
 
     /** @Buildable */

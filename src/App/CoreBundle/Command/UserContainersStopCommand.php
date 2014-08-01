@@ -33,7 +33,7 @@ class UserContainersStopCommand extends ContainerAwareCommand
         $count = 0;
 
         foreach ($user->getProjects() as $project) {
-            $output->writeln('shutting down project <info>'.$project->getGithubFullName().'<info>');
+            $output->writeln('shutting down project <info>'.$project->getFullName().'<info>');
 
             foreach ($project->getRunningBuilds() as $build) {
                 $container = $build->getContainer();

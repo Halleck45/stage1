@@ -54,12 +54,12 @@ class HooksController extends Controller
                 break;
             default:
                 $logger->error('could not find a build policy', [
-                    'project' => $project->getGithubFullName(),
+                    'project' => $project->getFullName(),
                     'number' => $payload->getParsedPayload()->number
                 ]);
 
                 return new JsonResponse([
-                    'project' => $project->getGithubFullName(),
+                    'project' => $project->getFullName(),
                     'class' => 'danger',
                     'policy' => $project->getSettings()->getPolicy(),
                     'message' => 'Could not find a valid build policy'
@@ -158,6 +158,7 @@ class HooksController extends Controller
         return [$ref, $hash];
     }
 
+    /** @todo move to github provider controller */
     public function githubAction(Request $request)
     {
         try {
