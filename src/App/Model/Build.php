@@ -83,8 +83,6 @@ class Build implements WebsocketRoutable
 
     private $isDemo = false;
 
-    private $demo;
-
     private $duration = 0;
 
     private $startTime;

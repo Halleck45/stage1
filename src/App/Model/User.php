@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-use FOS\UserBundle\Entity\User as BaseUser;
+use FOS\UserBundle\Model\User as BaseUser;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 use Serializable;

@@ -61,11 +61,12 @@
             </order-by>
         </one-to-many>
 
-        <one-to-one field="demo" target-entity="App\Model\Demo" mapped-by="build" />
         <one-to-one field="payload" target-entity="App\Model\GithubPayload" mapped-by="build">
             <cascade><persist /></cascade>
         </one-to-one>
+        
         <one-to-one field="script" target-entity="App\Model\BuildScript" mapped-by="build" />
+
         <one-to-one field="failure" target-entity="App\Model\BuildFailure" mapped-by="build" />
     </entity>
 
