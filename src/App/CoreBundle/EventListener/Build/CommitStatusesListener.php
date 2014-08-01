@@ -7,8 +7,6 @@ use App\CoreBundle\Provider\ProviderFactory;
 use App\Model\Build;
 use Psr\Log\LoggerInterface;
 
-use Exception;
-
 class CommitStatusesListener
 {
     /**

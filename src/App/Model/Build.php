@@ -1114,6 +1114,9 @@ class Build implements WebsocketRoutable
         return $this->script;
     }
 
+    /**
+     * @param string $name
+     */
     public function hasOption($name)
     {
         return isset($this->options[$name]);

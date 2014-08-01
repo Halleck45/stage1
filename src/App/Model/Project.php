@@ -6,7 +6,6 @@ use Docker\Context\Context;
 use Docker\Context\ContextBuilder;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
 use InvalidArgumentException;
 
 /**
@@ -929,7 +928,7 @@ SSH;
     /**
      * Set providerData
      *
-     * @param array|string $providerData
+     * @param string $providerData
      * @param mixed $value
      * 
      * @return Project

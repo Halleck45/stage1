@@ -3,8 +3,6 @@
 namespace App\Model;
 
 use FOS\UserBundle\Model\User as BaseUser;
-use Symfony\Component\Security\Core\User\UserInterface;
-
 use Serializable;
 
 class User extends BaseUser implements Serializable

@@ -91,7 +91,7 @@ class GitHubProvider
     /**
      * @param Project $project
      * @param Build $build
-     * @param string $state
+     * @param string $status
      */
     public function setCommitStatus(Project $project, Build $build, $status)
     {

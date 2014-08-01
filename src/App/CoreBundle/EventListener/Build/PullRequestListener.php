@@ -4,7 +4,6 @@ namespace App\CoreBundle\EventListener\Build;
 
 use App\CoreBundle\Event\BuildFinishedEvent;
 use App\Model\Build;
-use Guzzle\Http\Client;
 use Psr\Log\LoggerInterface;
 
 class PullRequestListener
