@@ -17,17 +17,17 @@ use Psr\Log\LoggerInterface;
 class BuildBranchRelationSubscriber implements EventSubscriber
 {
     /**
-     * @var Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var Symfony\Bridge\Doctrine\RegistryInterface
+     * @var RegistryInterface
      */
     private $doctrine;
 
     /**
-     * @param LoggerInterface                   $logger
+     * @param LoggerInterface   $logger
      * @param RegistryInterface $doctrine
      */
     public function __construct(LoggerInterface $logger, RegistryInterface $doctrine)
