@@ -18,7 +18,6 @@
         <parameter key="app_core.builder.class">App\CoreBundle\Builder\Builder</parameter>
         <parameter key="app_core.quota.per_user_running_builds.class">App\CoreBundle\Quota\PerUserRunningBuildsQuota</parameter>
         <parameter key="app_core.scheduler.rabbitmq.class">App\CoreBundle\Scheduler\RabbitMqScheduler</parameter>
-        <parameter key="app_core.provider.factory.class">App\CoreBundle\Provider\ProviderFactory</parameter>
     </parameters>
 
     <services>
@@ -26,10 +25,6 @@
         <service id="app_core.stopwatch" class="%app_core.stopwatch.class%" />
 
         <service id="app_core.scheduler" alias="app_core.scheduler.rabbitmq" />
-
-        <service id="app_core.provider.factory" class="%app_core.provider.factory.class%">
-            <argument type="service" id="service_container" />
-        </service>
 
         <service id="app_core.scheduler.rabbitmq" class="%app_core.scheduler.rabbitmq.class%">
             <argument type="service" id="logger" />

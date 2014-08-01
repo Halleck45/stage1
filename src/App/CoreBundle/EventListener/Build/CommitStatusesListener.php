@@ -59,8 +59,13 @@ class CommitStatusesListener
         }
 
         $project = $build->getProject();
-        $provider = $this->providerFactory->getProvider($project);
 
+        if (null === $project) {
+            $this->logger->info('could not find a project for build', ['build_id' => $build->getId()]);
+            return;
+        }
+
+        $provider = $this->providerFactory->getProvider($project);
         $provider->setCommitStatus($project, $build, 'success');
     }
 }

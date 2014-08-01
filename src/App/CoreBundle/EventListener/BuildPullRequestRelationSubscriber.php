@@ -73,7 +73,13 @@ class BuildPullRequestRelationSubscriber implements EventSubscriber
                 'ref' => $build->getRef()
             ]);
 
-            $provider = $this->providerFactory->getProvider($build->getProject());
+            $project = $build->getProject();
+
+            if (null === $project) {
+                $this->logger->info('could not find a project for build', ['build_id' => $build->getId()]);
+            }
+
+            $provider = $this->providerFactory->getProvider($project);
             $pr = $provider->createPullRequestFromPayload($build->getPayload());
             
             $em->persist($pr);

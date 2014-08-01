@@ -25,12 +25,18 @@ class GitHubProvider
     private $router;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param Client $client
      */
     public function __construct(LoggerInterface $logger, Client $client, UrlGeneratorInterface $router)
     {
         $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
 
+        $this->logger = $logger;
         $this->client = $client;
         $this->router = $router;
     }
