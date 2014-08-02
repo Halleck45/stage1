@@ -149,6 +149,7 @@ class SecurityController extends Controller
         }
     }
 
+    /** @deprecated */
     public function authorizeAction(Request $request, $scopes = null)
     {
         if (false && $this->container->getParameter('kernel.environment') === 'dev') {
@@ -192,6 +193,7 @@ class SecurityController extends Controller
         return $this->redirect($this->container->getParameter('github_base_url').'/login/oauth/authorize?'.http_build_query($payload));
     }
 
+    /** @deprecated */
     public function callbackAction(Request $request)
     {
         $code = $request->query->get('code');
@@ -218,7 +220,7 @@ class SecurityController extends Controller
         $data = $accessTokenResponse->json();
 
         if (isset($data['error'])) {
-            $this->addFlash('error', 'An error occurred during authentication, please try again later.');
+            $this->addFlash('error', $data['error']);
             $this->get('logger')->error('An error occurred during authentication', [
                 'error' => $data['error'],
                 'state' => $token

@@ -41,7 +41,7 @@
 
         <service id="app_core.consumer.project_import" class="%app_core.consumer.project_import.class%">
             <argument type="service" id="logger" />
-            <argument type="service" id="app_core.github.import" />
+            <argument type="service" id="app_core.provider.factory" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="old_sound_rabbit_mq.websocket_producer" />
             <argument type="service" id="router" />

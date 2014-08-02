@@ -36,10 +36,10 @@
         <field name="githubHookId" type="integer" column="github_hook_id" nullable="true" />
         <field name="githubDeployKeyId" type="integer" column="github_deploy_key_id" nullable="true" />
         <field name="githubUrl" column="github_url" type="string" length="255" nullable="true" />
-        <field name="cloneUrl" type="string" column="clone_url" length="255" />
-        <field name="sshUrl" type="string" column="ssh_url" length="255" />
-        <field name="keysUrl" type="string" column="keys_url" length="255" />
-        <field name="hooksUrl" type="string" column="hooks_url" length="255" />
+        <field name="cloneUrl" type="string" column="clone_url" length="255" nullable="true" />
+        <field name="sshUrl" type="string" column="ssh_url" length="255" nullable="true" />
+        <field name="keysUrl" type="string" column="keys_url" length="255" nullable="true" />
+        <field name="hooksUrl" type="string" column="hooks_url" length="255" nullable="true" />
         <!-- end github fields -->
 
         <many-to-many field="users" target-entity="App\Model\User" inversed-by="projects">

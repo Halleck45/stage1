@@ -1,6 +1,6 @@
 <ul class="nav nav-pills nav-stacked">
-    <li{% if app.request.attributes.get('_route') == 'app_core_projects_import' %} class="active"{% endif %}>
-        <a href="{{ path('app_core_projects_import') }}"><i class="fa fa-github"></i> Import projects from GitHub</a>
+    <li{% if app.request.attributes.get('_route') == 'app_core_import' %} class="active"{% endif %}>
+        <a href="{{ path('app_core_import') }}"><i class="fa fa-upload"></i> Import projects</a>
     </li>
 </ul>
 {% if app.user and app.user.projects | length > 0 %}

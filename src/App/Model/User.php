@@ -2,6 +2,8 @@
 
 namespace App\Model;
 
+use App\CoreBundle\Provider\ProviderInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use FOS\UserBundle\Model\User as BaseUser;
 use Serializable;
 
@@ -19,7 +21,13 @@ class User extends BaseUser implements Serializable
 
     protected $githubId;
 
-    protected $accessToken;
+    /**
+     * @todo the access token management could be refactored
+     *       using an AccessToken entity and a OneToMany relation
+     */
+    protected $providersAccessTokens;
+
+    protected $providersScopes;
 
     protected $createdAt;
 
@@ -37,9 +45,13 @@ class User extends BaseUser implements Serializable
 
     protected $privateKey;
 
-    protected $accessTokenScope;
-
     protected $betaSignup;
+
+    /** @deprecated */
+    protected $accessToken;
+
+    /** @deprecated */
+    protected $accessTokenScope;
 
     /**
      * Constructor
@@ -48,8 +60,10 @@ class User extends BaseUser implements Serializable
     {
         parent::__construct();
 
+        $this->providersScopes = [];
+        $this->providersAccessTokens = [];
+        
         $this->projects = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->roles = [];
     }
 
     /**
@@ -60,10 +74,93 @@ class User extends BaseUser implements Serializable
         return (string) $this->getUsername();
     }
 
+    /**
+     * @param ProviderInterface
+     * 
+     * @return ArrayCollection
+     */
+    public function getProjectsByProvider(ProviderInterface $provider)
+    {
+        return $this->getProjects()->filter(function($project) use ($provider) {
+            return $project->getProviderName() === $provider->getName();
+        });
+    }
+
+    /**
+     * @param string $provider
+     * 
+     * @return string|null
+     */
+    public function getProviderAccessToken($provider)
+    {
+        return array_key_exists($provider, $this->providersAccessTokens)
+            ? $this->providersAccessTokens[$provider]
+            : null;
+    }
+
+    /**
+     * @param string $provider
+     * @param string $accessToken
+     * 
+     * @return User
+     */
+    public function setProviderAccessToken($provider, $accessToken)
+    {
+        $this->providersAccessTokens[$provider] = $accessToken;
+
+        return $this;
+    }
+
+    /**
+     * @param string $provider
+     * 
+     * @return boolean
+     */
+    public function hasProviderAccessToken($provider)
+    {
+        return array_key_exists($provider, $this->getProvidersAccessTokens());
+    }
+
+    /**
+     * @param string $provider
+     * @param string $scope
+     * 
+     * @return boolean
+     */
+    public function hasProviderScope($provider, $scope)
+    {
+        return in_array($scope, $this->getProviderScopes($provider));
+    }
+
+    /**
+     * @param string $provider
+     * 
+     * @return string|null
+     */
+    public function getProviderScopes($provider)
+    {
+        return array_key_exists($provider, $this->providersScopes)
+            ? $this->providersScopes[$provider]
+            : [];
+    }
+
+    /**
+     * @param string $provider
+     * @param array  $scopes
+     * 
+     * @return User
+     */
+    public function setProviderScopes($provider, array $scopes)
+    {
+        $this->providersScopes[$provider] = $scopes;
+
+        return $this;
+    }
+
     public function hasPrivateProjects()
     {
         foreach ($this->getProjects() as $project) {
-            if ($project->getGithubPrivate()) {
+            if ($project->getIsPrivate()) {
                 return true;
             }
         }
@@ -71,6 +168,7 @@ class User extends BaseUser implements Serializable
         return false;
     }
 
+    /** @deprecated */
     public function addAccessTokenScopes($scopes)
     {
         $hasScopes = explode(',', $this->getAccessTokenScope());
@@ -81,13 +179,12 @@ class User extends BaseUser implements Serializable
     }
 
     /**
+     * @param string $provider
      * @param string $name
      */
-    public function hasAccessTokenScope($name)
+    public function hasAccessTokenScope($provider, $name)
     {
-        $scopes = explode(',', $this->getAccessTokenScope());
-
-        return false !== array_search($name, $scopes);
+        return in_array($name, $this->getProviderScopes($name));
     }
 
     public function serialize()
@@ -143,6 +240,8 @@ class User extends BaseUser implements Serializable
     /**
      * Set accessToken
      *
+     * @deprecated
+     * 
      * @param string $accessToken
      * @return User
      */
@@ -156,6 +255,8 @@ class User extends BaseUser implements Serializable
     /**
      * Get accessToken
      *
+     * @deprecated
+     * 
      * @return string 
      */
     public function getAccessToken()
@@ -385,6 +486,8 @@ class User extends BaseUser implements Serializable
 
     /**
      * Set accessTokenScope
+     * 
+     * @deprecated
      *
      * @param string $accessTokenScope
      * @return User
@@ -398,6 +501,8 @@ class User extends BaseUser implements Serializable
 
     /**
      * Get accessTokenScope
+     * 
+     * @deprecated
      *
      * @return string 
      */
@@ -427,5 +532,84 @@ class User extends BaseUser implements Serializable
     public function getBetaSignup()
     {
         return $this->betaSignup;
+    }
+    /**
+     * @var array
+     */
+    private $providerAccessTokens;
+
+    /**
+     * @var array
+     */
+    private $providerScopes;
+
+
+    /**
+     * Set providerAccessTokens
+     *
+     * @param array $providerAccessTokens
+     * @return User
+     */
+    public function setProviderAccessTokens($providerAccessTokens)
+    {
+        $this->providerAccessTokens = $providerAccessTokens;
+    
+        return $this;
+    }
+
+    /**
+     * Get providerAccessTokens
+     *
+     * @return array 
+     */
+    public function getProviderAccessTokens()
+    {
+        return $this->providerAccessTokens;
+    }
+
+    /**
+     * Set providersAccessTokens
+     *
+     * @param array $providersAccessTokens
+     * @return User
+     */
+    public function setProvidersAccessTokens($providersAccessTokens)
+    {
+        $this->providersAccessTokens = $providersAccessTokens;
+    
+        return $this;
+    }
+
+    /**
+     * Get providersAccessTokens
+     *
+     * @return array 
+     */
+    public function getProvidersAccessTokens()
+    {
+        return $this->providersAccessTokens;
+    }
+
+    /**
+     * Set providersScopes
+     *
+     * @param array $providersScopes
+     * @return User
+     */
+    public function setProvidersScopes($providersScopes)
+    {
+        $this->providersScopes = $providersScopes;
+    
+        return $this;
+    }
+
+    /**
+     * Get providersScopes
+     *
+     * @return array 
+     */
+    public function getProvidersScopes()
+    {
+        return $this->providersScopes;
     }
 }

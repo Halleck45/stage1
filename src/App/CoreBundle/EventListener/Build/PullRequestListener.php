@@ -3,6 +3,7 @@
 namespace App\CoreBundle\EventListener\Build;
 
 use App\CoreBundle\Event\BuildFinishedEvent;
+use App\CoreBundle\Provider\ProviderFactory;
 use App\Model\Build;
 use Psr\Log\LoggerInterface;
 

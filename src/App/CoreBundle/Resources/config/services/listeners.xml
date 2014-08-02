@@ -55,7 +55,7 @@
 
         <service id="app_core.listener.build.pull_request" class="%app_core.listener.build.pull_request.class%">
             <argument type="service" id="logger" />
-            <argument type="service" id="app_core.client.github" />
+            <argument type="service" id="app_core.provider.factory" />
             <argument>%stage1_enable_pr_comments%</argument>
             <tag name="monolog.logger" channel="build" />
             <tag name="kernel.event_listener" priority="0" event="build.finished" method="onBuildFinished" />

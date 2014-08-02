@@ -28,7 +28,7 @@ class DefaultController extends Controller
         ]);
     }
 
-    # @todo move to ProjectController
+    /** @deprecated */
     public function projectsImportAction(Request $request)
     {
         $existingProjects = [];
@@ -57,7 +57,7 @@ class DefaultController extends Controller
         ]);
     }
 
-    # @todo move to ProjectController
+    /** @deprecated */
     public function projectImportAction(Request $request)
     {
         $user = $this->getUser();

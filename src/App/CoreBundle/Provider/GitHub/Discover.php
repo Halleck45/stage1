@@ -2,13 +2,13 @@
 
 # @todo move to App\CoreBundle\Github\Discover
 
-namespace App\CoreBundle\Discover;
+namespace App\CoreBundle\Provider\GitHub;
 
 use Guzzle\Http\Client;
 use Psr\Log\LoggerInterface;
 use App\Model\User;
 
-class Github
+class Discover
 {
     private $client;
 
@@ -56,14 +56,16 @@ class Github
     {
         $this->projectsCache[$data['full_name']] = array(
             'name' => $data['name'],
-            'github_full_name' => $data['full_name'],
-            'github_owner_login' => $data['owner']['login'],
-            'github_owner_avatar_url' => $data['owner']['avatar_url'],
-            'github_id' => $data['id'],
+            'full_name' => $data['full_name'],
+            'slug' => preg_replace('/[^a-z0-9\-]/', '-', strtolower($data['full_name'])),
+            'owner_login' => $data['owner']['login'],
+            'owner_avatar_url' => $data['owner']['avatar_url'],
+            'id' => $data['id'],
             'clone_url' => $data['clone_url'],
             'ssh_url' => $data['ssh_url'],
             'hooks_url' => $data['hooks_url'],
             'keys_url' => $data['keys_url'],
+            'private' => $data['private'],
             'exists' => false,
         );
     }
@@ -90,7 +92,7 @@ class Github
     public function discover(User $user)
     {
         $client = clone $this->client;
-        $client->setDefaultOption('headers/Authorization', 'token '.$user->getAccessToken());
+        $client->setDefaultOption('headers/Authorization', 'token '.$user->getProviderAccessToken('github'));
 
         $request = $client->get('/user/orgs');
 

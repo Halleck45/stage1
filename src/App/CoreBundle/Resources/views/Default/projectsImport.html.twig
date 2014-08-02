@@ -37,10 +37,10 @@ $('#projects-import-filter').on('keyup', function() {
 {% block body %}
 <div id="projects_import_status" class="alert alert-info">
     <i class="fa fa-refresh fa-spin"></i>
-    <span>Inspecting your {% if not app.user.hasAccessTokenScope('repo') %}public{% endif %} github projects...</span>
+    <span>Inspecting your {% if not app.user.hasAccessTokenScope('github', 'repo') %}public{% endif %} github projects...</span>
 </div>
 
-{% if not app.user.hasAccessTokenScope('repo') %}
+{% if not app.user.hasAccessTokenScope('github', 'repo') %}
 <div id="projects_import_info" class="alert alert-info">
     <p>Stage1 can only import public repositories in organizations for which your membership is public and for which you have admin rights.</p>
 

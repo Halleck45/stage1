@@ -22,6 +22,7 @@ framework:
     session:
         name: STAGE1SESSID
         handler_id: ~
+        cookie_lifetime: 86400
     fragments:
         path: /_fragment
 

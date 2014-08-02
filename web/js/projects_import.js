@@ -19,14 +19,12 @@
             });
         }
 
-        on('project.import.start', function(data) {
-            // console.log(data);
-            $('#candidate-' + data.project_github_id + ' button').addClass('btn-success');
-
+        on('import.start', function(data) {
+            $('#candidate-' + data.project_slug + ' button').addClass('btn-success');
             $('#progress').html(tpl_import(data));
         });
 
-        on('project.import.step', function(data) {
+        on('import.step', function(data) {
             $('#steps li.running')
                 .removeClass('running')
                 .addClass('done')
@@ -42,7 +40,7 @@
                         .addClass('fa fa-refresh fa-spin');
         });
 
-        on('project.import.finished', function(data) {
+        on('import.finished', function(data) {
             $('#steps li.running')
                 .removeClass('running')
                 .addClass('done')
@@ -51,33 +49,26 @@
                     .addClass('fa fa-check');
 
             $('#organisations button.btn-import')
-                .not('#candidate-' + data.project_github_id + ' button')
+                .not('#candidate-' + data.project_slug + ' button')
                 .not('.btn-success')
                 .not('.btn-info')
                 .attr('disabled', false);
 
-            $('#candidate-' + data.project_github_id + ' button i').removeClass().addClass('fa fa-check');
+            $('#candidate-' + data.project_slug + ' button.btn-import i').removeClass().addClass('fa fa-check');
 
-            try {
+            // globaly resubscribing will automatically subscribe to the newly created project
+            primus.subscribe();
 
-                // globaly resubscribing will automatically subscribe to the newly created project
-                primus.subscribe();
+            var project_link = tpl_project_link({ url: data.project_url, name: data.project_full_name });
+            var project_button = tpl_project_button({ url: data.project_url });
 
-                var project_link = tpl_project_link({ url: data.project_url, name: data.project_full_name });
-                var project_button = tpl_project_button({ url: data.project_url });
+            $('#project-import-footer').append(project_button);
 
-                if ($('#nav-projects').length == 0) {
-                    $('#sidebar').prepend(tpl_nav_project());
-                }
-
-                $('#project-import-footer').append(project_button);
-
-                $('#nav-projects').append(tpl_nav_project_item({ link: project_link }));
-            } catch (e) {
-                // console.log(e);
-                // console.log(e.message);
-                // throw e;
+            if ($('#nav-projects').length == 0) {
+                $('#sidebar').prepend(tpl_nav_project());
             }
+
+            $('#nav-projects').append(tpl_nav_project_item({ link: project_link }));
         });
     });
 
@@ -137,12 +128,15 @@
         }).then(function(data) {
             var data = JSON.parse(data);
 
-            // console.log(data);
+            if (typeof(data.ask_scope) !== 'undefined') {
+                $('#btn-import-force').data('target', data.autostart);
 
-            if (typeof(data.ask_scope) !== 'undefined' && data.ask_scope) {
-                $('#btn-import-force').data('target', data.github_id);
                 var link = $('#ask_scope a#grant');
-                link.attr('href', link.attr('href').replace('%autostart%', data.github_id));
+
+                link.attr('href', link.data('href')
+                    .replace(encodeURI('%scope%'), data.ask_scope)
+                    .replace(encodeURI('%autostart%'), data.autostart));
+
                 $('#ask_scope').modal();
             }
         }).fail(function(jqXHR, textStatus, errorThrown) {
@@ -170,102 +164,4 @@
     $('#organisations').on('click', '.candidate button.btn-import', function() {
         doImport(this, false);
     });
-
-    window.find_repositories = function(autostart) {
-        var tpl_project = Mustache.compile($('#tpl-project').text());
-        var tpl_project_existing = Mustache.compile($('#tpl-project-existing').text());
-        var tpl_project_joinable = Mustache.compile($('#tpl-project-joinable').text());
-        var tpl_organisation = Mustache.compile($('#tpl-organisation').text());
-
-        var candidates_count = 0;
-        var organisations_count = 0;
-
-
-        $.get('/discover').then(function(data) {
-            data = JSON.parse(data);
-
-            if (data.length === 0) {
-                $('#projects_import_status')
-                    .removeClass()
-                    .addClass('alert alert-error');
-
-                $('#projects_import_status i')
-                    .removeClass()
-                    .addClass('fa fa-times');
-
-                $('#projects_import_status span')
-                    .text('No Symfony2 projects found in any of your organisations.');
-
-                return;
-            }
-
-            // console.log(data);
-
-            for (fullName in data) {
-                candidates_count++;
-
-                var project = data[fullName];
-
-                if ($('#org-' + project.github_owner_login).length == 0) {
-                    organisations_count++;
-
-                    $('#organisations').append(tpl_organisation({
-                        'name': project.github_owner_login,
-                        'avatar_url': project.github_owner_avatar_url
-                    }));
-                }
-
-                if (project.exists) {
-                    if (project.is_in) {
-                        var html = tpl_project_existing({
-                            name: project.github_full_name,
-                            url: project.url,
-                            users: function users() { return project.users.join(', '); }
-                        });                        
-                    } else {
-                        var html = tpl_project_joinable({
-                            name: project.github_full_name,
-                            url: project.url,
-                            join_url: project.join_url,
-                            users: function users() { return project.users.join(', '); }
-                        });
-                    }
-                } else {
-                    var html = tpl_project({
-                        name: project.github_full_name,
-                        github_id: project.github_id,
-                        data: [
-                            { name: 'name', value: project.name },
-                            { name: 'github_full_name', value: project.github_full_name },
-                            { name: 'github_owner_login', value: project.github_owner_login },
-                            { name: 'github_id', value: project.github_id },
-                            { name: 'clone_url', value: project.clone_url },
-                            { name: 'ssh_url', value: project.ssh_url },
-                            { name: 'hooks_url', value: project.hooks_url },
-                            { name: 'keys_url', value: project.keys_url }
-                        ]
-                    });
-                }
-
-                $('#org-' + project.github_owner_login + '-candidates').append(html);
-
-                $('#projects_import_status')
-                    .removeClass('alert-info')
-                    .addClass('alert-success');
-
-                $('#projects_import_status i')
-                    .removeClass()
-                    .addClass('fa fa-check');
-
-                $('#projects_import_status span')
-                    .text('Found ' + candidates_count + ' project' + (candidates_count != 1 ? 's' : '') + ' in ' + organisations_count + ' organisation' + (organisations_count != 1 ? 's' : '') + '.');
-            }
-
-            $('#projects-import-filter').show().focus();
-
-            if (autostart && $('#candidate-' + autostart).length > 0) {
-                $('.btn-import', '#candidate-' + autostart).trigger('click');
-            }
-        });
-    };
 })(jQuery, window);

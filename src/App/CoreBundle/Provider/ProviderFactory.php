@@ -14,10 +14,15 @@ class ProviderFactory
         $this->container = $container;
     }
 
-    public function getProvider(Project $project)
+    public function getProviderByName($name)
     {
-        $providerService = sprintf('app_core.provider.'.$project->getProviderName());
+        $providerService = sprintf('app_core.provider.'.$name);
 
         return $this->container->get($providerService);
+    }
+
+    public function getProvider(Project $project)
+    {
+        return $this->getProviderByName($project->getProviderName());
     }
 }

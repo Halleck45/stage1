@@ -1,0 +1,22 @@
+{% extends '::base.html.twig' %}
+
+{% block body %}
+
+{% if exception is defined %}
+<h2>Authentication Error</h2>
+<hr />
+
+<div class="alert alert-danger">
+    {{ exception.message }}
+</div>
+{% endif %}
+
+<h2>Select provider</h2>
+<hr />
+
+<ul>
+{% for provider in providers %}
+    <a class="btn" href="{{ path('app_core_import_provider', { providerName: provider }) }}">{{ provider }}</a>
+{% endfor %}
+</ul>
+{% endblock %}

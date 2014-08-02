@@ -1,18 +1,26 @@
 <?php
 
-namespace App\CoreBundle\Provider;
+namespace App\CoreBundle\Provider\GitHub;
 
+use App\CoreBundle\Provider\ProviderInterface;
+use App\CoreBundle\Provider\Scope;
 use App\Model\Build;
 use App\Model\Project;
 use App\Model\PullRequest;
+use App\Model\User;
 use Guzzle\Http\Client;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+use InvalidArgumentException;
+
 /**
- * App\CoreBundle\Provider\GitHubProvider
+ * App\CoreBundle\Provider\GitHub\Provider
  */
-class GitHubProvider
+class Provider implements ProviderInterface
 {
     /**
      * @var Client
@@ -30,17 +38,266 @@ class GitHubProvider
     private $logger;
 
     /**
-     * @param Client $client
+     * @var CsrfProviderInterface
      */
-    public function __construct(LoggerInterface $logger, Client $client, UrlGeneratorInterface $router)
+    private $csrfProvider;
+
+    /**
+     * @var string
+     */
+    private $authorizeUrl = '/login/oauth/authorize';
+
+    /**
+     * @var string
+     */
+    private $accessTokenUrl = '/login/oauth/access_token';
+
+    /**
+     * @var string
+     */
+    private $baseUrl = 'https://github.com';
+
+    /**
+     * @var string
+     */
+    private $baseApiUrl = 'https://api.github.com';
+
+    /**
+     * @var string
+     */
+    private $oauthClientId;
+
+    /**
+     * @var string
+     */
+    private $oauthClientSecret;
+
+    /**
+     * @var string[]
+     */
+    private $scopeMap = [
+        Scope::SCOPE_PRIVATE => 'repo',
+        Scope::SCOPE_PUBLIC => 'public_repo',
+        Scope::SCOPE_ACCESS => null
+    ];
+
+    /**
+     * @param LoggerInterface       $logger
+     * @param Client                $client
+     * @param UrlGeneratorInterface $router
+     * @param CsrfProviderInterface $csrfProvider
+     */
+    public function __construct(LoggerInterface $logger, Client $client, Discover $discover, Import $import, UrlGeneratorInterface $router, CsrfProviderInterface $csrfProvider, $oauthClientId, $oauthClientSecret)
     {
         $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
 
         $this->logger = $logger;
         $this->client = $client;
+        $this->discover = $discover;
+        $this->import = $import;
         $this->router = $router;
+        $this->csrfProvider = $csrfProvider;
+        $this->oauthClientId = $oauthClientId;
+        $this->oauthClientSecret = $oauthClientSecret;
     }
 
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return 'github';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisplayName()
+    {
+        return 'GitHub';
+    }
+
+    /**
+     * @return string
+     */
+    public function getOAuthClientId()
+    {
+        return $this->oauthClientId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOAuthClientSecret()
+    {
+        return $this->oauthClientSecret;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthorizeUrl()
+    {
+        return $this->baseUrl.$this->authorizeUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccessTokenUrl()
+    {
+        return $this->baseUrl.$this->accessTokenUrl;
+    }
+
+    /**
+     * Translates a Stage1 scope to the provider scope.
+     * 
+     * @param string $scope
+     * 
+     * @return string|null
+     */
+    public function translateScope($scope)
+    {
+        if (array_key_exists($scope, $this->scopeMap)) {
+            return $this->scopeMap[$scope];
+        }
+
+        throw new InvalidArgumentException('Unknown internal scope "'.$scope.'"');
+    }
+
+    /**
+     * Translates a provider scope to a Stage1 scope
+     * @param string $scope
+     * 
+     * @return string
+     */
+    public function reverseTranslateScope($scope)
+    {
+        if (in_array($scope, $this->scopeMap)) {
+            return $this->scopeMap[array_search($scope, $this->scopeMap)];
+        }
+
+        throw new InvalidArgumentException('Unknown provider scope "'.$scope.'"');
+    }
+
+    /**
+     * @param Request $request
+     * @param User    $user
+     */
+    public function handleOAuthCallback(Request $request, User $user)
+    {
+        $code = $request->get('code');
+        $token = $request->get('state');
+
+        if (!$this->csrfProvider->isCsrfTokenValid($this->getName(), $token)) {
+            throw new Exception('CSRF Mismatch');
+        }
+
+        $payload = [
+            'client_id' => $this->getOAuthClientId(),
+            'client_secret' => $this->getOAuthClientSecret(),
+            'code' => $code,
+        ];
+
+        $client = clone $this->client;
+        $client->setDefaultOption('headers/Accept', 'application/json');
+
+        $request = $client->post($this->getAccessTokenUrl());
+        $request->setBody(http_build_query($payload));
+
+        $response = $request->send();
+        $data = $response->json();
+
+        if (array_key_exists('error', $data)) {
+            $this->logger->error('An error occurred during authentication', ['data' => $data]);
+
+            throw new Exception(sprintf('%s: %s', $data['error'], $data['error_description']));
+        }
+
+        $user->setProviderAccessToken($this->getName(), $data['access_token']);
+        $user->setProviderScopes($this->getName(), explode(',', $data['scope']));
+    }
+
+    /**
+     * @param User  $user
+     * @param array $scope
+     * 
+     * @return boolean
+     */
+    public function hasScope(User $user, $scope)
+    {
+        $translatedScope = $this->translateScope($scope);
+
+        return (null === $translatedScope)
+            ? $user->hasProviderAccessToken($this->getName())
+            : $user->hasProviderScope($this->getName(), $translatedScope);
+    }
+
+    /**
+     * @param User $user
+     * @param string $scope
+     * @param string $redirectUri
+     * 
+     * @return Response
+     */
+    public function requireScope($scope)
+    {
+        $token = $this->csrfProvider->generateCsrfToken($this->getName());
+        $redirectUri = $this->router->generate('app_core_import_oauth_callback', ['providerName' => $this->getName()], true);
+
+        $payload = [
+            'client_id' => $this->getOAuthClientId(),
+            'redirect_uri' => $redirectUri,
+            'state' => $token,
+            'scope' => $this->translateScope($scope),
+        ];
+
+        $oauthUrl = $this->getAuthorizeUrl().'?'.http_build_query($payload);
+
+        return new RedirectResponse($oauthUrl);
+    }
+
+    public function getImporter()
+    {
+        return $this->import;
+    }
+
+    /**
+     * @param User $user
+     * 
+     * @return array
+     */
+    public function getIndexedRepositories(User $user)
+    {
+        $indexedProjects = [];
+
+        foreach ($this->getRepositories($user) as $project) {
+            if (!array_key_exists($project['owner_login'], $indexedProjects)) {
+                $indexedProjects[$project['owner_login']] = [];
+            }
+
+            $indexedProjects[$project['owner_login']][] = $project;
+        }
+
+        return $indexedProjects;
+    }
+
+    /**
+     * @param User $user
+     * 
+     * @return array
+     */
+    public function getRepositories(User $user)
+    {
+        return $this->discover->discover($user);
+    }
+
+    /**
+     * @param Project       $project
+     * @param GithubPayload $payload
+     * 
+     * @return PullRequest
+     */
     public function createPullRequestFromPayload(Project $project, GithubPayload $payload)
     {
         $json = $payload->getParsedPayload();
@@ -56,6 +313,12 @@ class GitHubProvider
         return $pr;
     }
 
+    /**
+     * @param Build  $build
+     * @param string $separator
+     * 
+     * @return string
+     */
     public function getPullRequestHead(Build $build, $separator = ':')
     {
         $project = $build->getProject();
@@ -67,10 +330,25 @@ class GitHubProvider
 
     /**
      * @param Project $project
+     * 
+     * @return Client
      */
     private function configureClientForProject(Project $project)
     {
-        $this->client->setDefaultOption('headers/Authorization', 'token '.$project->getUsers()->first()->getAccessToken());
+        return $this->configureClientForUser($project->getUsers()->first());
+    }
+
+    /**
+     * @param User $user
+     * 
+     * @return Client
+     */
+    public function configureClientForUser(User $user)
+    {
+        $accessToken = $user->getProviderAccessToken($this->getName());
+
+        $client = clone $this->client;
+        $client->setDefaultOption('headers/Authorization', 'token '.$accessToken);
 
         return $this->client;
     }

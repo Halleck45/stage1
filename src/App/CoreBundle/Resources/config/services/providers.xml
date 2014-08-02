@@ -6,7 +6,10 @@
 
     <parameters>
         <parameter key="app_core.provider.factory.class">App\CoreBundle\Provider\ProviderFactory</parameter>
-        <parameter key="app_core.provider.github.class">App\CoreBundle\Provider\GithubProvider</parameter>
+        <parameter key="app_core.provider.github.class">App\CoreBundle\Provider\GitHub\Provider</parameter>
+        <parameter key="app_core.provider.github.client.class">Guzzle\Http\Client</parameter>
+        <parameter key="app_core.provider.github.discover.class">App\CoreBundle\Provider\GitHub\Discover</parameter>
+        <parameter key="app_core.provider.github.import.class">App\CoreBundle\Provider\GitHub\Import</parameter>
     </parameters>
 
     <services>
@@ -16,8 +19,39 @@
 
         <service id="app_core.provider.github" class="%app_core.provider.github.class%">
             <argument type="service" id="logger" />
-            <argument type="service" id="app_core.client.github" />
+            <argument type="service" id="app_core.provider.github.client" />
+            <argument type="service" id="app_core.provider.github.discover" />
+            <argument type="service" id="app_core.provider.github.import" />
             <argument type="service" id="router" />
+            <argument type="service" id="form.csrf_provider" />
+            <argument>%github_client_id%</argument>
+            <argument>%github_client_secret%</argument>
         </service>
+
+        <service id="app_core.provider.github.client" class="%app_core.provider.github.client.class%">
+            <argument>%github_api_base_url%</argument>
+        </service>
+
+        <service id="app_core.provider.github.discover" class="%app_core.provider.github.discover.class%">
+            <argument type="service" id="app_core.provider.github.client" />
+            <argument type="service" id="logger" />
+        </service>
+
+        <service id="app_core.provider.github.import" class="%app_core.provider.github.import.class%">
+            <argument type="service" id="logger" />
+            <argument type="service" id="app_core.provider.github.client" />
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="app_core.redis" />
+            <argument type="service" id="router" />
+            <argument type="service" id="app_core.ssh_keys_generator" />
+            
+            <tag name="monolog.logger" channel="build" />
+
+            <call method="setFeatureIpAccessList">
+                <argument>%feature_ip_access_list%</argument>
+                <argument>%feature_token_access_list%</argument>
+            </call>
+        </service>
+
     </services>
 </container>

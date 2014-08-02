@@ -10,11 +10,8 @@
         <parameter key="session.handler.redis.class">Drak\NativeSession\NativeRedisSessionHandler</parameter>
         <parameter key="app_core.message.factory.class">App\CoreBundle\Message\MessageFactory</parameter>
         <parameter key="app_core.redis.class">Redis</parameter>
-        <parameter key="app_core.client.github.class">Guzzle\Http\Client</parameter>
         <parameter key="app_core.docker.http_client.class">Docker\Http\Client</parameter>
         <parameter key="app_core.docker.class">Docker\Docker</parameter>
-        <parameter key="app_core.discover.github.class">App\CoreBundle\Discover\Github</parameter>
-        <parameter key="app_core.github.import_class">App\CoreBundle\Github\Import</parameter>
         <parameter key="app_core.builder.class">App\CoreBundle\Builder\Builder</parameter>
         <parameter key="app_core.quota.per_user_running_builds.class">App\CoreBundle\Quota\PerUserRunningBuildsQuota</parameter>
         <parameter key="app_core.scheduler.rabbitmq.class">App\CoreBundle\Scheduler\RabbitMqScheduler</parameter>
@@ -74,10 +71,6 @@
             </call>
         </service>
 
-        <service id="app_core.client.github" class="%app_core.client.github.class%">
-            <argument>%github_api_base_url%</argument>
-        </service>
-
         <service id="app_core.docker.http_client" class="%app_core.docker.http_client.class%">
             <argument>%docker_api_base_url%</argument>
             <call method="setTimeout">
@@ -87,27 +80,6 @@
 
         <service id="app_core.docker" class="%app_core.docker.class%">
             <argument type="service" id="app_core.docker.http_client" />
-        </service>
-
-        <service id="app_core.discover.github" class="%app_core.discover.github.class%">
-            <argument type="service" id="app_core.client.github" />
-            <argument type="service" id="logger" />
-        </service>
-
-        <service id="app_core.github.import" class="%app_core.github.import_class%">
-            <argument type="service" id="logger" />
-            <argument type="service" id="app_core.client.github" />
-            <argument type="service" id="doctrine" />
-            <argument type="service" id="app_core.redis" />
-            <argument type="service" id="router" />
-            <argument type="service" id="app_core.ssh_keys_generator" />
-            
-            <tag name="monolog.logger" channel="build" />
-
-            <call method="setFeatureIpAccessList">
-                <argument>%feature_ip_access_list%</argument>
-                <argument>%feature_token_access_list%</argument>
-            </call>
         </service>
 
         <service id="app_core.builder" class="%app_core.builder.class%">

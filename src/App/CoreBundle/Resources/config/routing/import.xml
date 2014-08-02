@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<routes xmlns="http://symfony.com/schema/routing"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <route id="app_core_import" pattern="/import" methods="GET">
+        <default key="_controller">AppCoreBundle:Import:index</default>
+    </route>
+
+    <route id="app_core_import_provider" pattern="/import/{providerName}" methods="GET">
+        <default key="_controller">AppCoreBundle:Import:provider</default>
+    </route>
+
+    <route id="app_core_import_import" pattern="/import/{providerName}/import" methods="POST">
+        <default key="_controller">AppCoreBundle:Import:import</default>
+    </route>
+
+    <route id="app_core_import_scope" pattern="/import/{providerName}/scope/{scope}" methods="GET">
+        <default key="_controller">AppCoreBundle:Import:scope</default>
+    </route>
+
+    <route id="app_core_import_discover" pattern="/import/{providerName}/discover">
+        <default key="_controller">AppCoreBundle:Import:discover</default>
+    </route>
+
+    <route id="app_core_import_oauth_callback" pattern="/oauth/{providerName}" methods="GET">
+        <default key="_controller">AppCoreBundle:Import:oauthCallback</default>
+    </route>
+</routes>

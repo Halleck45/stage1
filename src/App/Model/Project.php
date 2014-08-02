@@ -276,11 +276,6 @@ SSH;
         return 'project.'.$this->getId();
     }
 
-    public function getFullName()
-    {
-        return $this->getGithubFullName();
-    }
-
     public function asMessage()
     {
         return [
@@ -902,6 +897,16 @@ SSH;
         $this->fullName = $fullName;
     
         return $this;
+    }
+
+    /**
+     * Get fullName
+     * 
+     * @return string
+     */
+    public function getFullName()
+    {
+        return $this->fullName;
     }
 
     /**

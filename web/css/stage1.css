@@ -6,7 +6,6 @@
 
 #projects-import-filter {
     width: 97%;
-    display: none;
 }
 
 #organisations .ctn-name {
@@ -252,3 +251,7 @@ textarea.per-line-settings {
     width: 50%;
     height: 15em;
 }*/
+
+#projects_import_info {
+    text-align: justify;
+}

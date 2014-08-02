@@ -1,0 +1,136 @@
+{% extends '::base.html.twig' %}
+
+{% block javascripts %}
+<script type="text/javascript">
+var import_url = '{{ importUrl }}';
+
+{% if autostart is defined and autostart %}
+$('.btn-import', '#candidate-{{ autostart }}').trigger('click');
+{% endif %}
+
+$('#projects-import-filter').on('keyup', function() {
+    var term = $(this).val();
+
+    $('[data-name]').each(function(i, el) {
+        var fullName = $(el).data('name');
+        var re = new RegExp('(' + term.toLowerCase() + ')', 'i');
+        if (term === '' || null !== fullName.match(re)) {
+            var ctnName = $(el).find('.ctn-name strong');
+            ctnName.html(term === '' ? fullName : fullName.replace(re, '<em>$1</em>'));
+            $(el).attr('data-filtered', 'no');
+            $(el).show();
+            $(el).parents('fieldset').show();
+        } else {
+            $(el).attr('data-filtered', 'yes');
+            $(el).hide();
+        }
+
+        if ($(el).parents('fieldset').find('[data-filtered=no]').length === 0) {
+            $(el).parents('fieldset').hide();
+        }
+    });
+});
+</script>
+{% endblock javascripts %}
+
+{% block body %}
+<h2>Import projects from {{ provider.displayName }}</h2>
+<hr />
+
+{% if not provider.hasScope(app.user, 'private') %}
+<div id="projects_import_info" class="alert alert-info">
+    <p>Stage1 can only import public repositories in organizations for which your membership is public and for which you have admin rights. In order to import <strong>private repositories</strong>, we must ask for the <strong>{{ provider.translateScope('private') }}</strong> oauth scope. It will give Stage1 read and write access to all your public and private repositories.</p>
+
+    <p><a class="btn" href="{{ path('app_core_import_scope', { providerName: provider.name, scope: 'private' }) }}">I want to import private repositories</a></p>
+</div>
+
+<hr />
+{% endif %}
+
+<div class="row-fluid">
+    <div class="span5" id="organisations">
+        <input type="text" id="projects-import-filter" placeholder="Filter projects..." autofocus />
+
+        {% for organisation, projects in indexedProjects %}
+        <fieldset id="org-{{ organisation }}">
+            <p class="lead">
+                <img class="candidates-organisation-avatar" height="20" width="20" src="{{ projects[0].owner_avatar_url }}" />
+                {{ projects[0].owner_login }}
+            </p>
+
+            <table class="table-candidates table">
+                <thead>
+                    <tr>
+                        <th width="50%">&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody id="org-{{ organisation }}-candidates">
+                    {% for project in projects %}
+                        {% if existingProjects[project.id] is not defined %}
+                        <tr class="candidate" id="candidate-{{ project.slug }}" data-name="{{ project.name }}" data-filtered="no">
+                            <td class="ctn-name"><strong>{{ project.name }}</strong></td>
+                            <td class="ctn-button">
+                                <button class="btn btn-import">import</button>
+                                {% for key,value in project %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}" />
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </fieldset>
+        {% endfor %}
+    </div>
+    <div class="span7" id="progress">
+    </div>
+</div>
+
+<div id="ask_scope" class="modal hide fade" data-backdrop="static">
+    <div class="modal-header">
+        <h3>Install WebHook?</h3>
+    </div>
+    <div class="modal-body">
+        <p>Stage1 doesn't have enough permissions to install the build WebHook.</p>
+
+        <p>The WebHook enables automated builds whenever you push to your GitHub repository. In order to install the WebHook, you need to grant Stage1 the <strong>public_repo</strong> scope, that will grant us read and write permissions to all your public repositories.<p>
+
+        <p>Use of this WebHook is optional, if you'd rather trigger builds manually, that's ok too (although you're missing much of what makes Stage1 awesome in the first place).</p>
+    </div>
+    <div class="modal-footer">
+        <a id="grant" data-href="{{ path('app_core_import_scope', {
+            providerName: provider.name,
+            scope: '%scope%',
+            autostart: '%autostart%'
+        }) }}" class="btn btn-primary">Grant permission and install WebHook</a>
+        <button class="btn" id="btn-import-force">Continue without the WebHook</button>
+    </div>
+</div>
+
+<script type="text/mustache" id="tpl-import">
+{% verbatim %}
+<p class="lead">Importing <strong>{{ project_full_name }}</strong></p>
+
+<ul id="steps">
+    {{#steps}}
+    <li class="pending" id="{{ id }}"><div class="icon-container"><i></i></div> {{ label }}</li>
+    {{/steps}}
+</ul>
+
+<div id="project-import-footer"></div>
+{% endverbatim %}
+</script>
+
+<script type="text/mustache" id="tpl-project-button">
+{% verbatim %}<a href="{{ url }}" class="btn btn-large btn-success">Visit project</a>{% endverbatim %}
+</script>
+
+<script type="text/mustache" id="tpl-project-link">
+{% verbatim %}<a href="{{ url }}">{{ name }}</a>{% endverbatim %}
+</script>
+
+<script type="text/mustache" id="tpl-project-nav">
+{% verbatim %}<li>{{{ link }}}</li>{% endverbatim %}
+</script>
+{% endblock %}

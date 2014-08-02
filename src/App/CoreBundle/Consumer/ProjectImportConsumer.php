@@ -2,21 +2,21 @@
 
 namespace App\CoreBundle\Consumer;
 
+use App\CoreBundle\Value\ProjectAccess;
+use App\CoreBundle\Provider\ProviderFactory;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use PhpAmqpLib\Message\AMQPMessage;
+use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
-use App\CoreBundle\Value\ProjectAccess;
-use App\CoreBundle\Github\Import;
-use Psr\Log\LoggerInterface;
 
 class ProjectImportConsumer implements ConsumerInterface
 {
     private $logger;
 
-    private $importer;
+    private $providerFactory;
 
     private $doctrine;
 
@@ -26,10 +26,10 @@ class ProjectImportConsumer implements ConsumerInterface
 
     private $websocketChannel;
 
-    public function __construct(LoggerInterface $logger, Import $importer, RegistryInterface $doctrine, Producer $websocket, Router $router)
+    public function __construct(LoggerInterface $logger, ProviderFactory $providerFactory, RegistryInterface $doctrine, Producer $websocket, Router $router)
     {
         $this->logger = $logger;
-        $this->importer = $importer;
+        $this->providerFactory = $providerFactory;
         $this->doctrine = $doctrine;
         $this->websocket = $websocket;
         $this->router = $router;
@@ -47,7 +47,10 @@ class ProjectImportConsumer implements ConsumerInterface
 
     public function setWebsocketChannel($channel)
     {
-        echo '   setting websocket channel (' . $channel . ')'.PHP_EOL;
+        $this->logger->info('setting websocket channel', [
+            'websocket_channel' => $channel,
+        ]);
+
         $this->websocketChannel = $channel;
     }
 
@@ -61,7 +64,10 @@ class ProjectImportConsumer implements ConsumerInterface
      */
     private function publish($event, $data = null)
     {
-        echo '-> publishing "' . $event . '" to channel "' . $this->getWebsocketChannel(). '"'.PHP_EOL;
+        $this->logger->info('publishing websocket event', [
+            'event' => $event,
+            'channel' => $this->getWebsocketChannel(),
+        ]);
 
         $message = [
             'event' => $event,
@@ -77,43 +83,53 @@ class ProjectImportConsumer implements ConsumerInterface
 
     public function execute(AMQPMessage $message)
     {
-        echo '<- received import request'.PHP_EOL;
-
+        $this->logger->info('received import request');
+        
         $body = json_decode($message->body);
 
-        $user = $this->doctrine->getRepository('Model:User')->find($body->user_id);
+        if (!isset($body->request) || !isset($body->request->full_name)) {
+            $this->logger->error('malformed request');
+            return;
+        }
 
-        $this->importer->setUser($user);
-        $this->importer->setInitialProjectAccess(new ProjectAccess($body->client_ip, $body->session_id));
+        $user = $this->doctrine->getRepository('Model:User')->find($body->user_id);
+        $provider = $this->providerFactory->getProviderByName($body->provider_name);
+
+        $importer = $provider->getImporter();
+
+        $importer->setUser($user);
+        $importer->setInitialProjectAccess(new ProjectAccess($body->client_ip, $body->session_id));
 
         $this->setWebsocketChannel($user->getChannel());
 
-        echo '   found user #' . $user->getId().PHP_EOL;
-        echo '   user channel is "' . $user->getChannel().'"'.PHP_EOL;
-        echo '   using websocket channel "' . $this->getWebsocketChannel() . '"'.PHP_EOL;
+        $this->logger->info('import request infos', [
+            'user_id' => $user->getId(),
+            'user_channel' => $user->getChannel(),
+            'websocket_channel' => $this->getWebsocketChannel()
+        ]);
 
-        $this->publish('project.import.start', [
-            'full_name' => $body->request->github_full_name,
-            'steps' => $this->importer->getSteps(),
-            'project_github_id' => $body->request->github_id,
+        $this->publish('import.start', [
+            'steps' => $importer->getSteps(),
+            'project_full_name' => $body->request->full_name,
+            'project_slug' => $body->request->slug,
         ]);
 
         $that = $this;
 
-        $project = $this->importer->import($body->request->github_full_name, function($step) use ($that) {
-            $that->publish('project.import.step', ['step' => $step['id']]);
+        $project = $importer->import($body->request->full_name, function($step) use ($that) {
+            $that->publish('import.step', ['step' => $step['id']]);
         });
 
         if (false === $project) {
-            $this->publish('project.import.finished');
+            $this->publish('import.finished');
         } else {
-            $this->publish('project.import.finished', [
+            $this->publish('import.finished', [
                 // @todo this might not be necessary anymore to pass the websocket token/channel
-                'websocket_token' => $this->importer->getProjectAccessToken(),
+                'websocket_token' => $importer->getProjectAccessToken(),
                 'websocket_channel' => $project->getChannel(),
+                'project_slug' => $project->getSlug(),
                 'project_full_name' => $project->getFullName(),
                 'project_url' => $this->generateUrl('app_core_project_show', ['id' => $project->getId()]),
-                'project_github_id' => $project->getGithubId(),
             ]);
         }
     }

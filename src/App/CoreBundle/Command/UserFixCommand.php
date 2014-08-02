@@ -75,6 +75,14 @@ class UserFixCommand extends ContainerAwareCommand
                 $user->setRoles(['ROLE_USER']);
             }
 
+            if (strlen($user->getAccessToken()) > 0 && count($user->getProvidersAccessTokens()) === 0) {
+                $user->setProviderAccessToken('github', $user->getAccessToken());
+            }
+
+            if (strlen($user->getAccessTokenScope()) > 0 && count($user->getProvidersScopes()) === 0) {
+                $user->setProviderScopes(explode(',', $user->getAccessTokenScope()));
+            }
+
             $em->persist($user);
         }
 
