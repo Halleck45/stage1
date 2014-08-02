@@ -200,20 +200,6 @@ class User extends BaseUser implements Serializable
         $this->setUsername($data[1]);
     }
 
-    /** @todo github refactoring */
-    static public function fromGithubResponse(array $response)
-    {
-        $user = new static();
-        $user->setGithubId($response['id']);
-        $user->setUsername($response['login']);
-
-        if (isset($response['email']) && strlen($response['email']) > 0) {
-            $user->setEmail($response['email']);
-        }
-
-        return $user;
-    }
-
     /**
      * Set githubId
      *
