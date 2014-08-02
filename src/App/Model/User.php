@@ -168,32 +168,19 @@ class User extends BaseUser implements Serializable
         return false;
     }
 
-    /** @deprecated */
-    public function addAccessTokenScopes($scopes)
-    {
-        $hasScopes = explode(',', $this->getAccessTokenScope());
-        $hasScopes = array_merge($hasScopes, $scopes);
-        $hasScopes = array_unique($hasScopes);
-
-        $this->setAccessTokenScope(implode(',', $hasScopes));
-    }
-
     /**
-     * @param string $provider
-     * @param string $name
-     * 
-     * @deprecated
+     * @return string
      */
-    public function hasAccessTokenScope($provider, $name)
-    {
-        return in_array($name, $this->getProviderScopes($name));
-    }
-
     public function serialize()
     {
         return serialize([$this->getId(), $this->getUsername()]);
     }
 
+    /**
+     * @param string $data
+     * 
+     * @return void
+     */
     public function unserialize($data)
     {
         $data = unserialize($data);
