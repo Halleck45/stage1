@@ -2,7 +2,7 @@
 
 <ul class="nav nav-tabs">
     {% if is_granted('ROLE_ADMIN') %}
-    <li class="disabled pane-title"><a href=""><strong>{{ project.githubFullName }}</strong></a></li>
+    <li class="disabled pane-title"><a href=""><strong>{{ project.fullName }}</strong></a></li>
     {% endif %}
 
     <li{% if current_route == 'app_core_project_branches' %} class="active"{% endif %}>
@@ -12,7 +12,7 @@
         <a href="{{ path('app_core_project_builds', { id: project.id }) }}">Builds</a>
     </li>
     
-    {% if project.getGithubPrivate %}
+    {% if project.isPrivate %}
     <li{% if current_route == 'app_core_project_access' %} class="active"{% endif %}>
         <a href="{{ path('app_core_project_access', { id: project.id }) }}">Access</a>
     </li>

@@ -153,6 +153,8 @@ class Project implements WebsocketRoutable
 
     /**
      * @param string $identityRoot
+     * 
+     * @todo github refactoring
      */
     public function getSshConfig($identityRoot)
     {

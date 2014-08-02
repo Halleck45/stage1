@@ -78,17 +78,6 @@
         <default key="_controller">AppCoreBundle:Hooks:github</default>
     </route>
 
-    <!-- @deprecated
-    <route id="app_core_auth_github_authorize" pattern="/login/github/{scopes}">
-        <default key="_controller">AppCoreBundle:Security:authorize</default>
-        <default key="scopes"></default>
-    </route>
-
-    <route id="app_core_auth_github_callback" pattern="/auth/github">
-        <default key="_controller">AppCoreBundle:Security:callback</default>
-    </route>
-    -->
-
     <route id="app_core_logout" pattern="/logout">
         <default key="_controller">AppCoreBundle:Security:logout</default>
     </route>

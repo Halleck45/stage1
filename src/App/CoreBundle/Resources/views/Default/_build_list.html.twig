@@ -17,7 +17,7 @@
             <td>
                 {% if build.hash %}
                     {% include 'AppCoreBundle:Default:_commit_hash.html.twig' with {
-                        project_full_name: build.project.githubFullName,
+                        project_full_name: build.project.fullName,
                         hash: build.hash
                     } %}
                 {% endif %}
