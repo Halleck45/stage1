@@ -74,3 +74,6 @@ parameters:
 
     # help
     help_site_url:                      http://help.stage1.dev/
+
+    # providers
+    providers:                          ['github']

@@ -17,8 +17,7 @@ class UserAuditCommand extends ContainerAwareCommand
             ->setName('stage1:user:audit')
             ->setDescription('Displays various information about a user')
             ->setDefinition([
-                new InputArgument('user_spec', InputArgument::REQUIRED, 'The user spec'),
-                new InputOption('github', null, InputOption::VALUE_NONE, 'Display github information too'),
+                new InputArgument('user_spec', InputArgument::REQUIRED, 'The user spec')
             ]);
     }
 
@@ -48,16 +47,5 @@ class UserAuditCommand extends ContainerAwareCommand
         $content = preg_replace('/^([^:-]+)(-|:) ([^\n]+)$/m', '\\1\\2 <comment>\\3</comment>', $content);
 
         $output->writeln($content);
-
-        if ($input->getOption('github')) {
-            $client = $this->getContainer()->get('app_core.client.github');
-            $client->setDefaultOption('headers/Authorization', 'token '.$user->getAccessToken());
-            $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
-
-            $request = $client->get('/user');
-            $response = $request->send();
-
-            $output->writeln(json_encode($response->json(), JSON_PRETTY_PRINT));
-        }
     }
 }

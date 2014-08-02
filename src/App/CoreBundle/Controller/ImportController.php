@@ -13,7 +13,7 @@ class ImportController extends Controller
     public function indexAction()
     {
         return $this->render('AppCoreBundle:Import:index.html.twig', [
-            'providers' => ['github'],
+            'providers' => $this->container->getParameter('providers'),
         ]);
     }
 
@@ -112,7 +112,7 @@ class ImportController extends Controller
         } catch (ProviderException $e) {
             return $this->render('AppCoreBundle:Import:index.html.twig', [
                 'exception' => $e,
-                'providers' => ['github'],
+                'providers' => $this->container->getParameter('providers'),
             ]);
         }
 

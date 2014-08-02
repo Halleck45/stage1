@@ -22,7 +22,7 @@
         {% for entry in entries %}
         <tr>
             <td>{% if entry.user %}{{ entry.user.username }}{% endif %}</td>
-            <td>{% if entry.project %}{{ entry.project.githubFullName }}{% endif %}</td>
+            <td>{% if entry.project %}{{ entry.project.fullName }}{% endif %}</td>
             <td>{% if entry.build %}<a href="{{ path('app_admin_build_output', { id: build.id }) }}">{{ build.id }}</a>{% endif %}</td>
             <td>{{ entry.email }}</td>
             <td>{% if entry.createdAt %}<abbr class="timeago" title="{{ entry.createdAt | date('c') }}">{{ entry.createdat | date('Y-m-d H:i:s') }}</abbr>{% endif %}</td>

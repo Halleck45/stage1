@@ -15,19 +15,21 @@ class ProjectImportCommand extends ContainerAwareCommand
             ->setName('stage1:project:import')
             ->setDescription('Imports a project')
             ->setDefinition([
-                new InputArgument('project_full_name', InputArgument::REQUIRED, 'The project\'s full name'),
+                new InputArgument('full_name', InputArgument::REQUIRED, 'The project\'s full name'),
                 new InputArgument('user_spec', InputArgument::REQUIRED, 'The user spec'),
+                new InputArgument('provider', InputArgument::REQUIRED, 'The provider'),
             ]);
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $user = $this->findUser($input->getArgument('user_spec'));
+        $provider = $this->getContainer()->get('app_core.provider.factory')->getProviderByName($input->getArgument('provider'));
 
-        $importer = $this->getContainer()->get('app_core.github.import');
+        $importer = $provider->getImporter();
         $importer->setUser($user);
 
-        $project = $importer->import($input->getArgument('project_full_name'), function($step) use ($output) {
+        $project = $importer->import($input->getArgument('full_name'), function($step) use ($output) {
             $output->writeln('  - '.$step['label'].' ('.$step['id'].')');
         });
 

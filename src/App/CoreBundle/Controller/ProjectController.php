@@ -294,38 +294,6 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function discoverAction()
-    {
-        $discover = $this->container->get('app_core.discover.github');
-        $projects = $discover->discover($this->getUser());
-
-        if (count($projects) === 0) {
-            return new JsonResponse(json_encode([]));
-        }
-
-        $githubIds = array_values(array_map(function($p) { return $p['github_id']; }, $projects));
-
-        $queryBuilder = $this->getDoctrine()->getRepository('Model:Project')->createQueryBuilder('p');
-        $queryBuilder->where('p.githubId IN(?1)');
-        $queryBuilder->setParameter(1, $githubIds);
-
-        $query = $queryBuilder->getQuery();
-
-        foreach ($query->execute() as $project) {
-            if (isset($projects[$project->getFullName()])) {
-                $projects[$project->getFullName()] = array_replace($projects[$project->getFullName()], [
-                    'exists' => true,
-                    'url' => $this->generateUrl('app_core_project_show', ['id' => $project->getId()]),
-                    'users' => $project->getUsers()->map(function($user) { return $user->getUsername(); })->toArray(),
-                    'is_in' => $project->getUsers()->contains($this->getUser()),
-                    'join_url' => $this->generateUrl('app_core_project_join', ['id' => $project->getId()]),
-                ]);
-            }
-        }
-
-        return new JsonResponse(json_encode($projects));
-    }
-
     /** @todo github provider refactoring */
     public function joinAction(Request $request, $id)
     {
