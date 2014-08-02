@@ -35,6 +35,7 @@
         <field name="options" column="options" type="json_array" nullable="true" />
         <field name="forceLocalBuildYml" column="force_local_build_yml" type="boolean" />
         <field name="builderHost" column="builderHost" type="string" nullable="true" />
+        <field name="commitUrl" column="commit_url" type="string" length="255" nullable="true" />
 
         <many-to-one field="project" target-entity="App\Model\Project" inversed-by="builds">
             <cascade><persist /></cascade>

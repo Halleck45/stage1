@@ -250,6 +250,7 @@ class Import
         $project->setName($infos['name']);
         $project->setDockerBaseImage('symfony2:latest');
         $project->setIsPrivate($infos['private']);
+        $project->setGitUrl($infos['private'] ? $infos['ssh_url'] : $infos['clone_url']);
 
         if (isset($infos['organization'])) {
             $this->logger->info('attaching project\'s organization', ['organization' => $infos['organization']['login']]);

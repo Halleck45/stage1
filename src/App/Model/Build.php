@@ -101,6 +101,8 @@ class Build implements WebsocketRoutable
 
     private $payload;
 
+    private $commitUrl;
+
     public function __construct()
     {
         $this->logs = new \Doctrine\Common\Collections\ArrayCollection();
@@ -1248,5 +1250,28 @@ class Build implements WebsocketRoutable
     public function getPullRequest()
     {
         return $this->pullRequest;
+    }
+
+    /**
+     * Set commitUrl
+     *
+     * @param string $commitUrl
+     * @return Build
+     */
+    public function setCommitUrl($commitUrl)
+    {
+        $this->commitUrl = $commitUrl;
+    
+        return $this;
+    }
+
+    /**
+     * Get commitUrl
+     *
+     * @return string 
+     */
+    public function getCommitUrl()
+    {
+        return $this->commitUrl;
     }
 }

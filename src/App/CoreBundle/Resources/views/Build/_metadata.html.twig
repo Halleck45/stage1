@@ -30,14 +30,13 @@
             <dt><abbr title="Pull Request">P.R.</abbr></dt>
             <dd>
                 <a href="{{ build.pullRequest.url }}">
-                    <i class="fa fa-github"></i>&nbsp;
                     {{ build.pullRequest.title }}
                 </a>
             </dd>
             {% else %}
             <dt>Ref.</dt>
             <dd>{{ build.ref }}{% if build.hash %}&nbsp;({% include 'AppCoreBundle:Default:_commit_hash.html.twig' with {
-                    project_full_name: build.project.githubFullName,
+                    project_full_name: build.project.fullName,
                     hash: build.hash
                 } %})
                 {% endif %}</dd>

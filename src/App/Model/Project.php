@@ -31,10 +31,9 @@ class Project implements WebsocketRoutable
 
     protected $providerName;
 
-    /**
-     * @var array
-     */
     protected $providerData;
+
+    protected $gitUrl;
 
     protected $builds;
 
@@ -213,7 +212,7 @@ SSH;
     public function getDomain()
     {
         if (null === $this->domain) {
-            list($org, $project) = explode('/', $this->getGithubFullName());
+            list($org, $project) = explode('/', $this->getFullName());
 
             $org = preg_replace('/[^a-z0-9\-]/', '-', strtolower($org));
             $project = preg_replace('/[^a-z0-9\-]/', '-', strtolower($project));
@@ -245,32 +244,17 @@ SSH;
         return 'auth:'.$this->getSlug();
     }
 
-    /** @todo */
-    public function getGitUrl()
-    {
-        if ($this->getGithubPrivate()) {
-            return $this->getSshUrl();
-        }
-
-        return $this->getCloneUrl();
-    }
-
-    public function isDemo()
-    {
-        foreach ($this->getUsers() as $user) {
-            if ($user->getUsername() === 'Demo') {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return json_encode($this->asMessage());
     }
 
+    /**
+     * @return string
+     */
     public function getChannel()
     {
         return 'project.'.$this->getId();
@@ -1268,5 +1252,28 @@ SSH;
     public function getIsPrivate()
     {
         return $this->isPrivate;
+    }
+
+    /**
+     * Set gitUrl
+     *
+     * @param string $gitUrl
+     * @return Project
+     */
+    public function setGitUrl($gitUrl)
+    {
+        $this->gitUrl = $gitUrl;
+    
+        return $this;
+    }
+
+    /**
+     * Get gitUrl
+     *
+     * @return string 
+     */
+    public function getGitUrl()
+    {
+        return $this->gitUrl;
     }
 }

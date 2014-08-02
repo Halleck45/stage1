@@ -93,6 +93,7 @@ class BuildScheduler
         $build->setStatus(Build::STATUS_SCHEDULED);
         $build->setRef($ref);
         $build->setHash($hash);
+        $build->setCommitUrl(sprintf('https://github.com/%s/commit/%s', $project->getFullName(), $hash));
 
         if (null !== $payload) {            
             $build->setPayload($payload);

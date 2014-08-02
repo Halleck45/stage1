@@ -23,6 +23,7 @@
         <field name="isPrivate" column="is_private" type="boolean" nullable="true" />
         <field name="providerName" column="provider_name" type="string" length="255" />
         <field name="providerData" column="provider_data" type="array" nullable="true" />
+        <field name="gitUrl" column="git_url" type="string" length="255" nullable="true" />
 
         <!-- @todo make not nullable when everything has been migrated -->
         <field name="dockerBaseImage" column="docker_base_image" type="string" nullable="true" />
