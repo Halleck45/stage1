@@ -62,14 +62,6 @@
         <default key="_controller">AppCoreBundle:Default:index</default>
     </route>
 
-    <route id="app_core_projects_import" pattern="/projects/import" methods="GET">
-        <default key="_controller">AppCoreBundle:Default:projectsImport</default>
-    </route>
-
-    <route id="app_core_project_import" pattern="/project/import" methods="POST">
-        <default key="_controller">AppCoreBundle:Default:projectImport</default>
-    </route>
-
     <route id="app_core_hooks_schedule" pattern="/hooks/schedule" methods="POST">
         <default key="_controller">AppCoreBundle:Hooks:schedule</default>
     </route>
