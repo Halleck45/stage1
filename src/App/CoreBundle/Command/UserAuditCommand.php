@@ -33,7 +33,7 @@ class UserAuditCommand extends ContainerAwareCommand
         $infos['id'] = $user->getId();
         $infos['username'] = $user->getUsername();
         $infos['email'] = $user->getEmail();
-        $infos['token'] = $user->getAccessToken();
+        $infos['tokens'] = $user->getProvidersAccessTokens();
         $infos['running_builds'] = count($em->getRepository('Model:Build')->findRunningBuildsByUser($user));
         $infos['created_at'] = $user->getCreatedAt()->format('r');
 

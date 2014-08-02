@@ -24,6 +24,8 @@ class BuildContainer extends Container
                  *       I think the token is only used to avoid hitting github's
                  *       API limit through composer, so maybe there's a way to use a
                  *       stage1 specific token instead
+                 *
+                 * @todo refactoring github (->getAccessToken() is deprecated)
                  */
                 'ACCESS_TOKEN='.$build->getProject()->getUsers()->first()->getAccessToken(),
                 'SYMFONY_ENV=prod',

@@ -55,7 +55,7 @@ class ProjectAuditCommand extends ContainerAwareCommand
         $infos['tokens'] = [];
 
         foreach ($project->getUsers() as $user) {
-            $infos['tokens'][$user->getUsername()] = $user->getAccessToken();
+            $infos['tokens'][$user->getUsername()] = $user->getProvidersAccessTokens();
         }
 
         $content = Yaml::dump($infos, 10);

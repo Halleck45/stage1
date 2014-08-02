@@ -17,6 +17,7 @@ class UserProjectDiscoverCommand extends ContainerAwareCommand
             ->setDescription('Discovers a user\'s projects')
             ->setDefinition([
                 new InputArgument('user_spec', InputArgument::REQUIRED, 'The user'),
+                new InputArgument('provider', InputArgument::REQUIRED, 'The provider to discover'),
                 new InputOption('all', null, InputOption::VALUE_NONE, 'Also show non-importable projects'),
             ]);
     }
@@ -25,9 +26,9 @@ class UserProjectDiscoverCommand extends ContainerAwareCommand
     {
         $user = $this->findUser($input->getArgument('user_spec'));
 
-        $output->writeln('using access token <info>'.$user->getAccessToken().'</info>');
-
-        $discover = $this->getContainer()->get('app_core.discover.github');
+        $provider = $this->getContainer()->get('app_core.provider.factory')->getProviderByName($input->getArgument('provider'));
+        $discover = $provider->getDiscover();
+        
         $discover->discover($user);
 
         $output->writeln('');

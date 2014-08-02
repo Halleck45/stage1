@@ -181,6 +181,8 @@ class User extends BaseUser implements Serializable
     /**
      * @param string $provider
      * @param string $name
+     * 
+     * @deprecated
      */
     public function hasAccessTokenScope($provider, $name)
     {

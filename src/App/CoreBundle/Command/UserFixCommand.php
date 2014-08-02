@@ -22,6 +22,8 @@ class UserFixCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine')->getManager();
 
         $env = $this->getContainer()->getParameter('kernel.environment');
+
+        /** @deprecated */
         $client = $this->getContainer()->get('app_core.client.github');
         $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
 
@@ -38,6 +40,7 @@ class UserFixCommand extends ContainerAwareCommand
                 $user->setChannel(null);
             }
 
+            /** @deprecated */
             if (strlen($user->getEmail()) === 0) {
                 $output->write('fixing email for <info>'.$user->getUsername().'</info> ');
 

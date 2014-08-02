@@ -257,6 +257,17 @@ class Provider implements ProviderInterface
         return new RedirectResponse($oauthUrl);
     }
 
+    /**
+     * @return Discover
+     */
+    public function getDiscover()
+    {
+        return $this->discover;
+    }
+
+    /**
+     * @return Import
+     */
     public function getImporter()
     {
         return $this->import;

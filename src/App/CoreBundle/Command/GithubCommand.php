@@ -24,9 +24,6 @@ class GithubCommand extends ContainerAwareCommand
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $client = $this->getContainer()->get('app_core.client.github');
-        $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
-
         if ($input->getOption('user')) {
             $repo = $this->getContainer()->get('doctrine')->getRepository('Model:User');
             $user = $repo->findOneBySpec($input->getOption('user'));
@@ -35,12 +32,15 @@ class GithubCommand extends ContainerAwareCommand
                 throw new \RuntimeException(sprintf('Could not impersonate user "%s"', $input->getOption('user')));
             }
 
-            $output->writeln('impersonating <info>'.$user->getUsername().'</info> with token <info>'.$user->getAccessToken().'</info>');
+            $output->writeln('impersonating <info>'.$user->getUsername().'</info>');
 
-            $client->setDefaultOption('headers/Authorization', 'token '.$user->getAccessToken());
+            $provider = $this->getContainer()->get('app_core.provider.github');
+            $client = $provider->configureClientForUser($user);
+            $client->setDefaultOption('headers/Authorization', 'token '.$accessToken);
         }
 
         $request = $client->get($input->getArgument('path'));
+
         try {
             $response = $request->send();
         } catch (ClientErrorResponseException $e) {

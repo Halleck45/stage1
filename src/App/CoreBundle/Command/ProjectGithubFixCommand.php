@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-
+/** @deprecated */
 class ProjectGithubFixCommand extends ContainerAwareCommand
 {
     private $githubInfos = [];
@@ -96,9 +96,9 @@ class ProjectGithubFixCommand extends ContainerAwareCommand
                 $githubHookUrl = $this->getContainer()->get('router')->generate('app_core_hooks_github', [], true);
                 $githubHookUrl = str_replace('http://localhost', 'http://stage1.io', $githubHookUrl);
 
-                $client = $this->getContainer()->get('app_core.client.github');
-                $client->setDefaultOption('headers/Authorization', 'token '.$project->getUsers()->first()->getAccessToken());
-                
+                $provider = $this->getContainer()->get('app_core.provider.github');
+                $client = $provider->configureClientForProject($project);
+
                 if (strlen($providerData['hook_id']) === 0) {
                     $output->writeln('adding webhook for <info>'.$project->getFullName().'</info>');
                     $request = $client->post($providerData['hooks_url']);
@@ -144,9 +144,8 @@ class ProjectGithubFixCommand extends ContainerAwareCommand
     private function getGithubInfos(Project $project)
     {
         if (!array_key_exists($project->getFullName(), $this->githubInfos)) {
-            $client = $this->getContainer()->get('app_core.client.github');
-            $client->setDefaultOption('headers/Authorization', 'token '.$project->getUsers()->first()->getAccessToken());
-            $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
+            $provider = $this->getContainer()->get('app_core.provider.github');
+            $client = $provider->configureClientForProject($project);
             $request = $client->get($project->getGithubUrl());
             $response = $request->send();
 
