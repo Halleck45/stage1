@@ -7,6 +7,7 @@
     <import resource="@AppCoreBundle/Resources/config/routing/project.xml" />
     <import resource="@AppCoreBundle/Resources/config/routing/build.xml" />
     <import resource="@AppCoreBundle/Resources/config/routing/import.xml" />
+    <import resource="@AppCoreBundle/Resources/config/routing/hooks.xml" />
 
     <route id="app_core_blog" pattern="/blog/" methods="GET" />
     <route id="app_core_blog_post" pattern="/blog/{slug}/" methods="GET" />
@@ -28,14 +29,6 @@
     <route id="app_core_terms" pattern="/terms">
         <default key="_controller">FrameworkBundle:Template:template</default>
         <default key="template">AppCoreBundle:Static:terms.html.twig</default>
-    </route>
-
-    <route id="app_core_demo" pattern="/demo" methods="GET">
-        <default key="_controller">AppCoreBundle:Demo:index</default>
-    </route>
-
-    <route id="app_core_demo_build" pattern="/demo" methods="POST">
-        <default key="_controller">AppCoreBundle:Demo:build</default>
     </route>
 
     <route id="app_core_waiting_list" pattern="/landing" methods="GET">
@@ -60,25 +53,5 @@
 
     <route id="app_core_homepage" pattern="/" methods="GET">
         <default key="_controller">AppCoreBundle:Default:index</default>
-    </route>
-
-    <route id="app_core_hooks_schedule" pattern="/hooks/schedule" methods="POST">
-        <default key="_controller">AppCoreBundle:Hooks:schedule</default>
-    </route>
-
-    <route id="app_core_hooks_github" pattern="/hooks/github" methods="POST">
-        <default key="_controller">AppCoreBundle:Hooks:github</default>
-    </route>
-
-    <route id="app_core_logout" pattern="/logout">
-        <default key="_controller">AppCoreBundle:Security:logout</default>
-    </route>
-
-    <route id="app_core_configure_save" pattern="/configure" methods="POST">
-        <default key="_controller">AppCoreBundle:Configure:save</default>
-    </route>
-
-    <route id="app_core_configure" pattern="/configure" methods="GET">
-        <default key="_controller">AppCoreBundle:Configure:index</default>
     </route>
 </routes>

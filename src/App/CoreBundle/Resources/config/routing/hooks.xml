@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<routes xmlns="http://symfony.com/schema/routing"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <route id="app_core_hooks_schedule" pattern="/hooks/schedule" methods="POST">
+        <default key="_controller">AppCoreBundle:Hooks:schedule</default>
+    </route>
+
+    <route id="app_core_hooks_github" pattern="/hooks/github" methods="POST">
+        <default key="_controller">AppCoreBundle:Hooks:github</default>
+    </route>
+    
+</routes>
