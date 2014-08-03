@@ -102,7 +102,7 @@ class ProjectController extends Controller
             $hash = $this->getHashFromRef($project, $ref);
 
             $scheduler = $this->container->get('app_core.build_scheduler');
-            $build = $scheduler->schedule($project, $ref, $hash, null);
+            $build = $scheduler->schedule($project, $ref, $hash);
 
             return new JsonResponse([
                 'build_url' => $this->generateUrl('app_core_build_show', ['id' => $build->getId()]),

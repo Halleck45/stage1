@@ -2,7 +2,7 @@
 
 namespace App\CoreBundle\Provider\GitHub;
 
-use App\CoreBundle\Provider\PayloadInterface
+use App\CoreBundle\Provider\PayloadInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class Payload implements PayloadInterface
@@ -34,6 +34,14 @@ class Payload implements PayloadInterface
 
     /**
      * @return string
+     */
+    public function getRawContent()
+    {
+        return $this->contents;
+    }
+
+    /**
+     * @return string
      * 
      * @todo use ProviderInterface#getName
      */
@@ -48,6 +56,14 @@ class Payload implements PayloadInterface
     public function isPullRequest()
     {
         return isset($this->parsed['pull_request']);
+    }
+
+    /**
+     * @param string
+     */
+    public function getRepositoryFullName()
+    {
+        return $this->parsed['repository']['full_name'];
     }
 
     /**
@@ -68,7 +84,7 @@ class Payload implements PayloadInterface
     public function isBuildable()
     {
         if ($this->isPullRequest()) {
-            return in_array($this->parsed['pull_request']['action'], ['opened', 'synchronize']);
+            return in_array($this->parsed['action'], ['opened', 'synchronize']);
         }
 
         return true;

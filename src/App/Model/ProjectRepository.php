@@ -10,8 +10,11 @@ class ProjectRepository extends EntityRepository
     public function findOneByPayload(PayloadInterface $payload)
     {
         return $this->createQueryBuilder('p')
-            ->where('b.providerName = ? and b.fullName = ?')
-            ->setParameters([$payload->getProviderName(), $payload->getRepositoryFullName()])
+            ->where('p.providerName = :providerName and p.fullName = :fullName')
+            ->setParameters([
+                'providerName' => $payload->getProviderName(),
+                'fullName' => $payload->getRepositoryFullName()
+            ])
             ->getQuery()
             ->getOneOrNullResult();
     }

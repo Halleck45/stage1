@@ -114,7 +114,7 @@ class BuildConsumer implements ConsumerInterface
 
         $allowBuild = true;
 
-        if (null !== $build->getPayload() && count($sameHashBuilds) > 0) {
+        if (count($sameHashBuilds) > 0) {
             $allowBuild = array_reduce($sameHashBuilds, function($result, $b) use($build) {
                 /**
                  * - If at least one other build is NOT scheduled, it means it has already been built.

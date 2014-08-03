@@ -330,16 +330,16 @@ class Provider implements ProviderInterface
      * 
      * @return PullRequest
      */
-    public function createPullRequestFromPayload(Project $project, PayloadInterface $payload)
+    public function createPullRequestFromPayload(Project $project, $payload)
     {
-        $json = $payload->getParsedPayload();
+        $json = json_decode($payload, true);
 
         $pr = new PullRequest();
-        $pr->setNumber($payload->getPullRequestNumber());
+        $pr->setNumber($json['pull_request']['number']);
         $pr->setTitle($json['pull_request']['title']);
-        $pr->setRef($payload->getRef());
-        $pr->setOpen($payload->isBuildable());
-        $pr->setUrl(sprintf('https://github.com/%s/pull/%d', $project->getFullName(), $payload->getPullRequestNumber()));
+        $pr->setRef(sprintf('pull/%d/head', $json['pull_request']['number']));
+        $pr->setOpen($json['pull_request']['state'] === 'open');
+        $pr->setUrl(sprintf('https://github.com/%s/pull/%d', $project->getFullName(), $json['pull_request']['number']));
         $pr->setProject($project);
 
         return $pr;
@@ -602,24 +602,17 @@ class Provider implements ProviderInterface
      * @param string  $ref
      *
      * @return string
-     * 
-     * @deprecated ?
      */
     public function getHashFromRef(Project $project, $ref)
     {
-        $url = sprintf('/repos/%s/git/refs/heads', $project->getFullName());
-
-        $client = $this->configureClientForProject($project);
-        $remoteRefs = $client->get($url)->send()->json();
-     
-        foreach ($remoteRefs as $remoteRef) {
-            if ('refs/heads/'.$ref === $remoteRef['ref']) {
-                $hash = $remoteRef['object']['sha'];
-                break;
-            }
+        if (substr($ref, 0, 4) !== 'pull') {
+            $ref = 'heads/'.$ref;
         }
 
-        return $hash;
+        $url = sprintf('/repos/%s/git/refs/%s', $project->getFullName(), $ref);
+        $client = $this->configureClientForProject($project);
+
+        return $client->get($url)->send()->json()['object']['sha'];
     }
 
     /**

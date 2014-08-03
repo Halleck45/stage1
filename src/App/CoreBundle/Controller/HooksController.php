@@ -54,12 +54,12 @@ class HooksController extends Controller
             $project = $manager->getRepository('Model:Project')->findOneByPayload($payload);
 
             if (null === $project) {
-                $logger->error('could not find a project for payload'. [
+                $logger->error('could not find a project for payload', [
                     'providerName' => $payload->getProviderName(),
                     'repositoryFullName' => $payload->getRepositoryFullName()
                 ]);
 
-                throw $this->createNotFoundException('Unknown '.$provider->getName().' project');
+                throw $this->createNotFoundException('Unknown '.$provider->getName().' project "'.$payload->getRepositoryFullName().'"');
             }
 
             $logger->info('found project', ['full_name' => $project->getFullName()]);
@@ -79,6 +79,7 @@ class HooksController extends Controller
 
             if ($response instanceof Response) {
                 $logger->info('got response, sending', ['status_code' => $response->getStatusCode()]);
+
                 return $response;
             }
 
@@ -87,7 +88,7 @@ class HooksController extends Controller
             $logger->info('got ref and hash', ['ref' => $ref, 'hash' => $hash]);
 
             $scheduler = $this->get('app_core.build_scheduler');
-            $build = $scheduler->schedule($project, $ref, $hash);
+            $build = $scheduler->schedule($project, $ref, $hash, $payload);
 
             $logger->info('scheduled build', ['build' => $build->getId(), 'ref' => $build->getRef()]);
 
@@ -148,11 +149,16 @@ class HooksController extends Controller
         }
 
         if (!$payload->isBuildable()) {
-            return new JsonResponse(json_encode(null), 200);
+            return new JsonResponse(json_encode([
+                'class' => 'danger',
+                'message' => 'pull request is not buildable'
+            ]), 200);
         }
 
         $ref = sprintf('pull/%d/head', $payload->getPullRequestNumber());
 
+        $provider = $this->get('app_core.provider.factory')->getProvider($project);
+        
         return [$ref, $provider->getHashFromRef($project, $ref)];
     }
 

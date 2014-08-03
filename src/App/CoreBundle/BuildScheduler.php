@@ -3,6 +3,7 @@
 namespace App\CoreBundle;
 
 use App\CoreBundle\Message\MessageFactory;
+use App\CoreBundle\Provider\PayloadInterface;
 use App\CoreBundle\Scheduler\SchedulerInterface;
 use App\Model\Build;
 use App\Model\Project;
@@ -63,7 +64,7 @@ class BuildScheduler
      * 
      * @see App\CoreBundle\EventListener\BuildBranchRelationSubscriber for automatic creation of non-existing branches
      */
-    public function schedule(Project $project, $ref, $hash, $options = [])
+    public function schedule(Project $project, $ref, $hash, PayloadInterface $payload = null, $options = [])
     {
         $logger = $this->logger;
         $logger->info('scheduling build', ['project' => $project->getId(), 'ref' => $ref, 'hash' => $hash]);
@@ -93,6 +94,13 @@ class BuildScheduler
         $build->setRef($ref);
         $build->setHash($hash);
         $build->setCommitUrl(sprintf('https://github.com/%s/commit/%s', $project->getFullName(), $hash));
+
+        if (null !== $payload) {
+            $build->setIsPullRequest($payload->isPullRequest());
+            $build->setRawPayload($payload->getRawContent());            
+        } else {
+            $build->setIsPullRequest(false);
+        }
 
         if (isset($options['force_local_build_yml']) && $options['force_local_build_yml']) {
             $build->setForceLocalBuildYml(true);

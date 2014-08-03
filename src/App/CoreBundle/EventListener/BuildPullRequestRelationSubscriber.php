@@ -52,7 +52,7 @@ class BuildPullRequestRelationSubscriber implements EventSubscriber
      */
     public function supports($entity)
     {
-        return ($entity instanceof Build) && $build->isPullRequest();
+        return ($entity instanceof Build) && $entity->isPullRequest();
     }
 
     /**
@@ -88,7 +88,7 @@ class BuildPullRequestRelationSubscriber implements EventSubscriber
             }
 
             $provider = $this->providerFactory->getProvider($project);
-            $pr = $provider->createPullRequestFromPayload($build->getPayload());
+            $pr = $provider->createPullRequestFromPayload($project, $build->getRawPayload());
             
             $em->persist($pr);
         }

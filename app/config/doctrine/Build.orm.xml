@@ -36,6 +36,8 @@
         <field name="forceLocalBuildYml" column="force_local_build_yml" type="boolean" />
         <field name="builderHost" column="builderHost" type="string" nullable="true" />
         <field name="commitUrl" column="commit_url" type="string" length="255" nullable="true" />
+        <field name="isPullRequest" column="is_pull_request" type="boolean" nullable="true" />
+        <field name="rawPayload" column="raw_payload" type="text" nullable="true" />
 
         <many-to-one field="project" target-entity="App\Model\Project" inversed-by="builds">
             <cascade><persist /></cascade>

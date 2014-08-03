@@ -2,11 +2,11 @@
 
 namespace App\CoreBundle\Command;
 
+use App\Model\Project;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use App\Model\Project;
 use InvalidArgumentException;
 
 class BuildScheduleCommand extends ContainerAwareCommand
@@ -37,7 +37,7 @@ class BuildScheduleCommand extends ContainerAwareCommand
         $build = $this
             ->getContainer()
             ->get('app_core.build_scheduler')
-            ->schedule($project, $input->getArgument('ref'), null);
+            ->schedule($project, $input->getArgument('ref'));
 
         $output->writeln('scheduled build <info>'.$build->getId().'</info>');
     }

@@ -10,6 +10,7 @@ use Docker\Context\Context;
 use Doctrine\Common\Persistence\ObjectManager;
 use Psr\Log\LoggerInterface;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\ProcessBuilder;
 use Redis;
 
@@ -73,13 +74,16 @@ class DockerfileStrategy
 
         $workdir = sys_get_temp_dir().'/stage1/workdir/'.$build->getId();
 
-        if (!is_dir($workdir)) {
-            mkdir($workdir, 0777, true);
+        if (is_dir($workdir)) {
+            $fs = new Filesystem();
+            $fs->remove($workdir);
         }
+
+        mkdir($workdir, 0777, true);
 
         $logger->info('using workdir', ['workdir' => $workdir]);
 
-        mkdir($workdir.'/ssh');
+        mkdir($workdir.'/ssh', 0755, true);
 
         $project->dumpSshKeys($workdir.'/ssh', 'root');
 

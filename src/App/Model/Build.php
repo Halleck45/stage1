@@ -103,6 +103,10 @@ class Build implements WebsocketRoutable
 
     private $commitUrl;
 
+    private $isPullRequest;
+
+    private $rawPayload;
+
     public function __construct()
     {
         $this->logs = new \Doctrine\Common\Collections\ArrayCollection();
@@ -141,11 +145,7 @@ class Build implements WebsocketRoutable
 
     public function isPullRequest()
     {
-        if ($this->getPayload()) {
-            return $this->getPayload()->isPullRequest();
-        }
-
-        return substr($this->getRef(), 0, 4) === 'pull';
+        return $this->getIsPullRequest();
     }
 
     public function getRoutingKey()
@@ -1248,5 +1248,51 @@ class Build implements WebsocketRoutable
     public function getCommitUrl()
     {
         return $this->commitUrl;
+    }
+
+    /**
+     * Set isPullRequest
+     *
+     * @param boolean $isPullRequest
+     * @return Build
+     */
+    public function setIsPullRequest($isPullRequest)
+    {
+        $this->isPullRequest = $isPullRequest;
+    
+        return $this;
+    }
+
+    /**
+     * Get isPullRequest
+     *
+     * @return boolean 
+     */
+    public function getIsPullRequest()
+    {
+        return $this->isPullRequest;
+    }
+
+    /**
+     * Set rawPayload
+     *
+     * @param string $rawPayload
+     * @return Build
+     */
+    public function setRawPayload($rawPayload)
+    {
+        $this->rawPayload = $rawPayload;
+    
+        return $this;
+    }
+
+    /**
+     * Get rawPayload
+     *
+     * @return string 
+     */
+    public function getRawPayload()
+    {
+        return $this->rawPayload;
     }
 }

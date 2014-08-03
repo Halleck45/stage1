@@ -6,6 +6,7 @@ class PullRequest
 {
     protected $id;
 
+    /** @todo this should probably go in some providerData field */
     protected $number;
 
     protected $ref;
@@ -54,6 +55,9 @@ class PullRequest
         return false;
     }
 
+    /**
+     * @return string
+     */
     public function getDomain()
     {
         return sprintf('pr-%d.%s', $this->getNumber(), $this->getProject()->getDomain());
