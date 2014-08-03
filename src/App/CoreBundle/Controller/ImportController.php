@@ -10,6 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ImportController extends Controller
 {
+    /**
+     * @return Response
+     */
     public function indexAction()
     {
         return $this->render('AppCoreBundle:Import:index.html.twig', [
@@ -17,6 +20,12 @@ class ImportController extends Controller
         ]);
     }
 
+    /**
+     * @param Request   $request
+     * @param string    $providerName
+     * 
+     * @return Response
+     */
     public function importAction(Request $request, $providerName)
     {
         $user = $this->getUser();
@@ -51,6 +60,13 @@ class ImportController extends Controller
         return new JsonResponse(json_encode(true));
     }
 
+    /**
+     * @param Request   $request
+     * @param string    $providerName
+     * @param string    $scope
+     * 
+     * @return Response
+     */
     public function scopeAction(Request $request, $providerName, $scope)
     {
         $provider = $this->get('app_core.provider.factory')->getProviderByName($providerName);
@@ -70,6 +86,12 @@ class ImportController extends Controller
         return $provider->requireScope($scope);
     }
 
+    /**
+     * @param Request   $request
+     * @param string    $providerName
+     * 
+     * @return Response
+     */
     public function providerAction(Request $request, $providerName)
     {
         $provider = $this->get('app_core.provider.factory')->getProviderByName($providerName);
@@ -82,23 +104,51 @@ class ImportController extends Controller
             }
         }
 
-        // var_export($provider->getIndexedRepositories($this->getUser())); die;
+        $indexedProjects = $provider->getRepositories($this->getUser());
 
+        // looking for already imported projects
         $existingProjects = [];
 
         foreach ($this->getUser()->getProjectsByProvider($provider) as $project) {
-            $existingProjects[$project->getProviderData('id')] = true;
+            $existingProjects[$project->getFullName()] = true;
+        }
+
+        // looking for joinable projects
+        $fullNames = [];
+
+        foreach ($indexedProjects as $org => $projects) {
+            foreach ($projects as $project) {
+                $fullNames[] = $project->getFullName();
+            }
+        }
+
+        $joinableProjects = [];
+        $projects = $this->get('doctrine')->getRepository('Model:Project')->findByFullName($fullNames);
+
+        foreach ($projects as $project) {
+            $joinableProjects[$project->getFullName()] = [
+                'users' => $project->getUsers()->map(function($user) { return $user->getUsername(); })->toArray(),
+                'url' => $this->generateUrl('app_core_project_show', ['id' => $project->getId()]),
+                'join_url' => $this->generateUrl('app_core_project_join', ['id' => $project->getId()]),
+            ];
         }
 
         return $this->render('AppCoreBundle:Import:provider.html.twig', [
             'provider' => $provider,
-            'indexedProjects' => $provider->getIndexedRepositories($this->getUser()),
+            'indexedProjects' => $indexedProjects,
             'existingProjects' => $existingProjects,
+            'joinableProjects' => $joinableProjects,
             'importUrl' => $this->generateUrl('app_core_import_import', ['providerName' => $providerName]),
             'autostart' => $request->get('autostart')
         ]);            
     }
 
+    /**
+     * @param Request   $request
+     * @param string    $providerName
+     * 
+     * @return Response
+     */
     public function oauthCallbackAction(Request $request, $providerName)
     {
         $provider = $this->get('app_core.provider.factory')->getProviderByName($providerName);

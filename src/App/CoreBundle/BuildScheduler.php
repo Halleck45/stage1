@@ -2,11 +2,10 @@
 
 namespace App\CoreBundle;
 
-use App\Model\Build;
-use App\Model\Project;
-use App\Model\GithubPayload;
 use App\CoreBundle\Message\MessageFactory;
 use App\CoreBundle\Scheduler\SchedulerInterface;
+use App\Model\Build;
+use App\Model\Project;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Doctrine\RegistryInterface;

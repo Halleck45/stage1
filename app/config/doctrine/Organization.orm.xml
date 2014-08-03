@@ -8,6 +8,7 @@
             <generator strategy="AUTO" />
         </id>
         <field name="name" column="name" type="string" length="255" />
+        <!-- @deprecated -->
         <field name="githubId" column="github_id" type="integer" nullable="true" />
         <field name="publicKey" column="public_key" type="text" />
         <field name="privateKey" column="private_key" type="text" />

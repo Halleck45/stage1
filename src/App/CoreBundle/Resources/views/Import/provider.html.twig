@@ -66,14 +66,23 @@ $('#projects-import-filter').on('keyup', function() {
                 </thead>
                 <tbody id="org-{{ organisation }}-candidates">
                     {% for project in projects %}
-                        {% if existingProjects[project.id] is not defined %}
+                        {% if existingProjects[project.fullName] is not defined %}
                         <tr class="candidate" id="candidate-{{ project.slug }}" data-name="{{ project.name }}" data-filtered="no">
-                            <td class="ctn-name"><strong>{{ project.name }}</strong></td>
+                            <td class="ctn-name">
+                                <strong>{{ project.name }}</strong>
+                                {% if joinableProjects[project.fullName] is defined %}
+                                <div class="help">{{ joinableProjects[project.fullName].users | join(', ') }}</div>
+                                {% endif %}
+                            </td>
                             <td class="ctn-button">
+                                {% if joinableProjects[project.fullName] is defined %}
+                                <button class="btn btn-join" data-join-url="{{ joinableProjects[project.fullName].join_url }}">join</button>
+                                {% else %}
                                 <button class="btn btn-import">import</button>
                                 {% for key,value in project %}
                                 <input type="hidden" name="{{ key }}" value="{{ value }}" />
                                 {% endfor %}
+                                {% endif %}
                             </td>
                         </tr>
                         {% endif %}

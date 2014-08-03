@@ -21,9 +21,8 @@ fi
 cd $APP_ROOT
 
 # composer configuration to avoid hitting github's api rate limit
-if [ -f composer.json ]; then
-    # stage1_announce "configuring composer with token $ACCESS_TOKEN"
-    stage1_composer_configure $ACCESS_TOKEN
+if [ -f composer.json && ! -z "$GITHUB_ACCESS_TOKEN"]; then
+    stage1_composer_configure $GITHUB_ACCESS_TOKEN
 fi
 
 # check if we must (or want to) use the local stage1.yml configuration

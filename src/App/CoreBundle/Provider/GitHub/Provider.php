@@ -151,6 +151,14 @@ class Provider implements ProviderInterface
     }
 
     /**
+     * @return string
+     */
+    public function getAccessToken(Project $project)
+    {
+        return $project->getUsers()->first()->getProviderAccessToken($this->getName());
+    }
+
+    /**
      * Translates a Stage1 scope to the provider scope.
      * 
      * @param string $scope

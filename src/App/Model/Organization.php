@@ -37,6 +37,11 @@ class Organization
      */
     private $id;
 
+    /**
+     * @var integer
+     * @deprecated 
+     */
+    private $githubId;
 
     /**
      * Set name
@@ -207,11 +212,6 @@ class Organization
     {
         return $this->projects;
     }
-    /**
-     * @var integer
-     */
-    private $githubId;
-
 
     /**
      * Set githubId

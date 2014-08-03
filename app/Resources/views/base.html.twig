@@ -40,7 +40,7 @@
                             <li class="divider-vertical"></li>
                             <li>{% include 'AppCoreBundle:Feedback:_compose.html.twig' %}</li>
                             <li class="divider-vertical"></li>
-                            <li><a href="{{ path('app_core_logout') }}"><i class="fa fa-power-off"></i></a></li>
+                            <li><a href="{{ path('fos_user_security_logout') }}"><i class="fa fa-power-off"></i></a></li>
                             {% else %}
                             <li><a href="{{ path('app_core_auth_github_authorize') }}" id="login">Login with github</a></li>
                             {% endif %}
