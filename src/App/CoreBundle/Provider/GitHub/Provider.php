@@ -2,6 +2,7 @@
 
 namespace App\CoreBundle\Provider\GitHub;
 
+use App\CoreBundle\Provider\PayloadInterface;
 use App\CoreBundle\Provider\ProviderInterface;
 use App\CoreBundle\Provider\Scope;
 use App\Model\Build;
@@ -304,21 +305,33 @@ class Provider implements ProviderInterface
     }
 
     /**
-     * @param Project       $project
-     * @param GithubPayload $payload
+     * @param Request $request
+     * 
+     * @return \App\CoreBundle\Provider\PayloadInterface
+     */
+    public function createPayloadFromRequest(Request $request)
+    {
+        return new Payload($request);
+    }
+
+    /**
+     * @param Project           $project
+     * @param PayloadInterface  $payload
+     * 
+     * @todo implement PayloadInterface#getPullRequestUrl and PayloadInterface#getPullRequestTitle
      * 
      * @return PullRequest
      */
-    public function createPullRequestFromPayload(Project $project, GithubPayload $payload)
+    public function createPullRequestFromPayload(Project $project, PayloadInterface $payload)
     {
         $json = $payload->getParsedPayload();
 
         $pr = new PullRequest();
-        $pr->setNumber($json->number);
-        $pr->setTitle($json->pull_request->title);
-        $pr->setRef(sprintf('pull/%d/head', $json->number));
-        $pr->setOpen(true);
-        $pr->setUrl(sprintf('https://github.com/%s/pull/%d', $project->getFullName(), $json->number));
+        $pr->setNumber($payload->getPullRequestNumber());
+        $pr->setTitle($json['pull_request']['title']);
+        $pr->setRef($payload->getRef());
+        $pr->setOpen($payload->isBuildable());
+        $pr->setUrl(sprintf('https://github.com/%s/pull/%d', $project->getFullName(), $payload->getPullRequestNumber()));
         $pr->setProject($project);
 
         return $pr;

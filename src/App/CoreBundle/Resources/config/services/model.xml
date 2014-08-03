@@ -16,7 +16,6 @@
 
         <parameter key="app_core.model.demo.class">App\Model\Demo</parameter>
         <parameter key="app_core.model.feedback.class">App\Model\Feedback</parameter>
-        <parameter key="app_core.model.github_payload.class">App\Model\GithubPayload</parameter>
         <parameter key="app_core.model.organization.class">App\Model\Organization</parameter>
 
         <parameter key="app_core.model.project.class">App\Model\Project</parameter>

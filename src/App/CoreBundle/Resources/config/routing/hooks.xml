@@ -8,8 +8,12 @@
         <default key="_controller">AppCoreBundle:Hooks:schedule</default>
     </route>
 
+    <route id="app_core_hooks_provider" pattern="/hooks/{providerName}">
+        <default key="_controller">AppCoreBundle:Hooks:provider</default>
+    </route>
+
+    <!-- @deprecated -->
     <route id="app_core_hooks_github" pattern="/hooks/github" methods="POST">
         <default key="_controller">AppCoreBundle:Hooks:github</default>
     </route>
-    
 </routes>

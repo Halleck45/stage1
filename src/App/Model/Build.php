@@ -1041,31 +1041,6 @@ class Build implements WebsocketRoutable
     }
 
     /**
-     * Set payload
-     *
-     * @param \App\Model\GithubPayload $payload
-     * @return Build
-     */
-    public function setPayload(\App\Model\GithubPayload $payload = null)
-    {
-        $payload->setBuild($this);
-        
-        $this->payload = $payload;
-    
-        return $this;
-    }
-
-    /**
-     * Get payload
-     *
-     * @return \App\Model\GithubPayload 
-     */
-    public function getPayload()
-    {
-        return $this->payload;
-    }
-
-    /**
      * Set allowRebuild
      *
      * @param boolean $allowRebuild

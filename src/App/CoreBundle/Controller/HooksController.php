@@ -6,7 +6,7 @@ use App\Model\Branch;
 use App\Model\Build;
 use App\Model\Project;
 use App\Model\ProjectSettings;
-use App\Model\GithubPayload;
+use App\CoreBundle\Provider\PayloadInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -39,7 +39,82 @@ class HooksController extends Controller
         }
     }
 
-    private function schedulePullRequest(GithubPayload $payload, Project $project)
+    public function providerAction(Request $request, $providerName)
+    {
+        try {
+            $logger = $this->get('logger');
+            $provider = $this->get('app_core.provider.factory')->getProviderByName($providerName);
+            $payload = $provider->createPayloadFromRequest($request);
+
+            if ($payload->isDummy()) {
+                return JsonResponse(json_encode(true), 200);
+            }
+
+            $manager = $this->get('doctrine.orm.entity_manager');
+            $project = $manager->getRepository('Model:Project')->findOneByPayload($payload);
+
+            if (null === $project) {
+                $logger->error('could not find a project for payload'. [
+                    'providerName' => $payload->getProviderName(),
+                    'repositoryFullName' => $payload->getRepositoryFullName()
+                ]);
+
+                throw $this->createNotFoundException('Unknown '.$provider->getName().' project');
+            }
+
+            $logger->info('found project', ['full_name' => $project->getFullName()]);
+
+            if ($project->getStatus() === Project::STATUS_HOLD) {
+                $logger->info('project is on hold');
+                return new JsonResponse(['class' => 'danger', 'message' => 'Project is on hold']);
+            }
+
+            $strategy = $payload->isPullRequest()
+                ? 'schedulePullRequest'
+                : 'scheduleBranchPush';
+
+            $logger->info('elected strategy', ['strategy' => $strategy]);
+
+            $response = $this->$strategy($payload, $project);
+
+            if ($response instanceof Response) {
+                $logger->info('got response, sending', ['status_code' => $response->getStatusCode()]);
+                return $response;
+            }
+
+            list($ref, $hash) = $response;
+
+            $logger->info('got ref and hash', ['ref' => $ref, 'hash' => $hash]);
+
+            $scheduler = $this->get('app_core.build_scheduler');
+            $build = $scheduler->schedule($project, $ref, $hash);
+
+            $logger->info('scheduled build', ['build' => $build->getId(), 'ref' => $build->getRef()]);
+
+            return new JsonResponse([
+                'build_url' => $this->generateUrl('app_core_build_show', ['id' => $build->getId()]),
+                'build' => $build->asMessage(),
+            ], 201);
+        } catch (Exception $e) {
+            $logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
+            if (method_exists($e, 'getResponse')) {
+                $logger->error($e->getResponse()->getBody(true));
+            }
+
+            return new JsonResponse([
+                'class' => 'danger',
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
+
+    /**
+     * @todo the policy check and Payload->isBuildable() could be implemented
+     *       as a voting system
+     */
+    private function schedulePullRequest(PayloadInterface $payload, Project $project)
     {
         $logger = $this->get('logger');
 
@@ -55,7 +130,7 @@ class HooksController extends Controller
             default:
                 $logger->error('could not find a build policy', [
                     'project' => $project->getFullName(),
-                    'number' => $payload->getParsedPayload()->number
+                    'pull_request_number' => $payload->getPullRequestNumber()
                 ]);
 
                 return new JsonResponse([
@@ -67,20 +142,25 @@ class HooksController extends Controller
         }
 
         if (!$doBuild) {
-            $logger->info('build declined by project policy', ['project' => $project->getId(), 'number' => $payload->getParsedPayload()->number]);
+            $logger->info('build declined by project policy', ['project' => $project->getId(), 'number' => $payload->getPullRequestNumber()]);
+
             return new JsonResponse(['class' => 'info', 'message' => 'Build declined by project policy ('.$project->getSettings()->getPolicy().')'], 200);
         }
 
-        if (!in_array($payload->getAction(), ['opened', 'synchronize'])) {
+        if (!$payload->isBuildable()) {
             return new JsonResponse(json_encode(null), 200);
         }
 
         $ref = sprintf('pull/%d/head', $payload->getPullRequestNumber());
 
-        return [$ref, $this->getHashFromRef($project, $ref)];
+        return [$ref, $provider->getHashFromRef($project, $ref)];
     }
 
-    private function scheduleBranchPush(GithubPayload $payload, Project $project)
+    /**
+     * @todo the policy check and Payload->isBuildable() could be implemented
+     *       as a voting system
+     */
+    private function scheduleBranchPush(PayloadInterface $payload, Project $project)
     {
         $logger = $this->get('logger');
         $em = $this->get('doctrine')->getManager();
@@ -124,6 +204,7 @@ class HooksController extends Controller
             return new JsonResponse(['class' => 'info', 'message' => 'Build declined by project policy ('.$project->getSettings()->getPolicy().')'], 200);
         }
 
+        /** @todo this should be in the PayloadInterface as ->isDelete() or something */
         if ($hash === '0000000000000000000000000000000000000000') {
             $branch = $em
                 ->getRepository('Model:Branch')
@@ -156,86 +237,5 @@ class HooksController extends Controller
         }
 
         return [$ref, $hash];
-    }
-
-    /** @todo move to github provider controller */
-    public function githubAction(Request $request)
-    {
-        try {
-            $logger = $this->get('logger');
-            $payload = GithubPayload::fromRequest($request);
-
-            if ($payload->isDummy()) {
-                return new JsonResponse(json_encode(true), 200);
-            }
-
-            # first, find project!
-            $em = $this->getDoctrine()->getManager();
-
-            $project = $em
-                ->getRepository('Model:Project')
-                ->findOneByGithubId($payload->getGithubRepositoryId());
-
-            if (!$project) {
-                $logger->error('could not find a project', [
-                    'github_repository_id' => $payload->getGithubRepositoryId(),
-                    'full_name' => $payload->getGithubFullName(),
-                ]);
-
-                throw $this->createNotFoundException('Unknown Github project');
-            }
-
-            $logger->info('found project', ['full_name' => $project->getGithubFullName()]);
-
-            if ($project->getStatus() === Project::STATUS_HOLD) {
-                $logger->info('project is on hold');
-                return new JsonResponse(['class' => 'danger', 'message' => 'Project is on hold']);
-            }
-
-            $strategy = $payload->isPullRequest()
-                ? 'schedulePullRequest'
-                : 'scheduleBranchPush';
-
-            $logger->info('elected strategy', ['strategy' => $strategy]);
-
-            $response = $this->$strategy($payload, $project);
-
-            if ($response instanceof Response) {
-                $logger->info('got response, sending', ['status_code' => $response->getStatusCode()]);
-                return $response;
-            }
-
-            list($ref, $hash) = $response;
-
-            $logger->info('got ref and hash', [
-                'ref' => $ref,
-                'hash' => $hash
-            ]);
-
-            $scheduler = $this->get('app_core.build_scheduler');
-            $build = $scheduler->schedule($project, $ref, $hash, $payload);
-
-            $logger->info('scheduled build', [
-                'build' => $build->getId(),
-                'ref' => $build->getRef()
-            ]);
-
-            return new JsonResponse([
-                'build_url' => $this->generateUrl('app_core_build_show', ['id' => $build->getId()]),
-                'build' => $build->asMessage(),
-            ], 201);
-        } catch (Exception $e) {
-            $logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
-
-            if (method_exists($e, 'getResponse')) {
-                $logger->error($e->getResponse()->getBody(true));
-            }
-
-            return new JsonResponse([
-                'class' => 'danger',
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ], 500);
-        }
     }
 }
