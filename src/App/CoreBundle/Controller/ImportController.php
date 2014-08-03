@@ -104,7 +104,7 @@ class ImportController extends Controller
             }
         }
 
-        $indexedProjects = $provider->getRepositories($this->getUser());
+        $indexedProjects = $provider->getIndexedRepositories($this->getUser());
 
         // looking for already imported projects
         $existingProjects = [];
@@ -118,7 +118,7 @@ class ImportController extends Controller
 
         foreach ($indexedProjects as $org => $projects) {
             foreach ($projects as $project) {
-                $fullNames[] = $project->getFullName();
+                $fullNames[] = $project['full_name'];
             }
         }
 
