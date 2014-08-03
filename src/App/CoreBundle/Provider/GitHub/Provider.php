@@ -365,7 +365,7 @@ class Provider implements ProviderInterface
      * 
      * @return Client
      */
-    private function configureClientForProject(Project $project)
+    public function configureClientForProject(Project $project)
     {
         if (count($project->getUsers()) === 0) {
             throw new InvalidArgumentException('Project "'.$project->getFullName().'" has no users');

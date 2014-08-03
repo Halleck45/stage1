@@ -93,7 +93,7 @@ class User extends BaseUser implements Serializable
      */
     public function getProviderAccessToken($provider)
     {
-        return array_key_exists($provider, $this->providersAccessTokens)
+        return array_key_exists($provider, $this->getProvidersAccessTokens())
             ? $this->providersAccessTokens[$provider]
             : null;
     }
@@ -562,7 +562,7 @@ class User extends BaseUser implements Serializable
      */
     public function getProvidersAccessTokens()
     {
-        return $this->providersAccessTokens;
+        return $this->providersAccessTokens ?: [];
     }
 
     /**

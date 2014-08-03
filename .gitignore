@@ -3,6 +3,7 @@ stage1.sublime-*
 
 # samples
 /pr.json
+stage1.sql*
 
 # daemontools
 supervise

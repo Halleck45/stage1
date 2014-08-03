@@ -24,7 +24,7 @@ class UserFixCommand extends ContainerAwareCommand
         $env = $this->getContainer()->getParameter('kernel.environment');
 
         /** @deprecated */
-        $client = $this->getContainer()->get('app_core.client.github');
+        $client = $this->getContainer()->get('app_core.provider.github.client');
         $client->setDefaultOption('headers/Accept', 'application/vnd.github.v3');
 
         foreach ($repository->findAll() as $user) {
@@ -55,7 +55,7 @@ class UserFixCommand extends ContainerAwareCommand
                         }
                     }                    
                 } catch (Exception $e) {
-                    $output->write('<error>failed</error>');
+                    $output->write('<error>failed ('.$e->getMessage().'</error>');
                 }
 
                 $output->writeln('');
@@ -83,7 +83,7 @@ class UserFixCommand extends ContainerAwareCommand
             }
 
             if (strlen($user->getAccessTokenScope()) > 0 && count($user->getProvidersScopes()) === 0) {
-                $user->setProviderScopes(explode(',', $user->getAccessTokenScope()));
+                $user->setProviderScopes('github', explode(',', $user->getAccessTokenScope()));
             }
 
             $em->persist($user);

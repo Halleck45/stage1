@@ -2,6 +2,7 @@
 
 namespace App\CoreBundle\Command;
 
+use App\Model\Project;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -41,6 +42,8 @@ class ProjectFixProviderCommand extends ContainerAwareCommand
             return false;
         }
 
+        $project->setFullName($project->getGithubFullName());
+
         $project->setProviderName('github');
         $project->setProviderData([
             'clone_url' => $project->getCloneUrl(),
@@ -50,9 +53,9 @@ class ProjectFixProviderCommand extends ContainerAwareCommand
             'contents_url' => $project->getContentsUrl(),
             'id' => $project->getGithubId(),
             'full_name' => $project->getGithubFullName(),
-            'owner_login' => $project->getOwnerLogin(),
-            'hook_id' => $project->getHookId(),
-            'deploy_key_id' => $project->getDeployKeyId(),
+            'owner_login' => $project->getGithubOwnerLogin(),
+            'hook_id' => $project->getGithubHookId(),
+            'deploy_key_id' => $project->getGithubDeployKeyId(),
             'private' => $project->getGithubPrivate(),
             'url' => $project->getGithubUrl(),
         ]);

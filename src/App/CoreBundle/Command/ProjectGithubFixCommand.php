@@ -27,10 +27,13 @@ class ProjectGithubFixCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine')->getManager();
 
         foreach ($repository->findByProviderName('github') as $project) {
+            $output->writeln('using access token <info>'.$project->getUsers()->first()->getProviderAccessToken('github'));
+
             try {
                 $githubInfos = $this->getGithubInfos($project);
             } catch (\Exception $e) {
-                $output->writeln('<error>Could not fetch infos for <info>'.$project->getFullName().'</info>');
+                $output->writeln('<error>Could not fetch infos for <info>'.$project->getFullName().'</info></error>');
+                $output->writeln('<error>'.$e->getMessage().'</error>');
                 continue;
             }
 
@@ -51,7 +54,7 @@ class ProjectGithubFixCommand extends ContainerAwareCommand
                 $providerData['url'] = 'https://api.github.com/repos/'.$project->getFullName();
             }
 
-            if (strlen($providerData['private']) === 0) {
+            if (!array_key_exists('private', $providerData) || !is_bool($providerData['private'])) {
                 $output->writeln('fixing github private status for <info>'.$project->getFullName().'</info>');
                 $providerData['private'] = $githubInfos['private'];
             }
