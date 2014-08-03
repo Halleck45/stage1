@@ -48,13 +48,21 @@ class BuildPullRequestRelationSubscriber implements EventSubscriber
     }
 
     /**
+     * @return boolean
+     */
+    public function supports($entity)
+    {
+        return ($entity instanceof Build) && $build->isPullRequest();
+    }
+
+    /**
      * @param LifecycleEventArgs
      */
     public function prePersist(LifecycleEventArgs $args)
     {
         $build = $args->getEntity();
 
-        if (!$build instanceof Build || !$build->isPullRequest()) {
+        if (!$this->supports($build)) {
             return;
         }
 

@@ -36,6 +36,9 @@ class PullRequest
         $this->builds = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getTitle();

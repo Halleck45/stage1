@@ -336,7 +336,7 @@ class User extends BaseUser implements Serializable
     public function getPrivateProjects()
     {
         return $this->projects->filter(function($project) {
-            return $project->getGithubPrivate();
+            return $project->getIsPrivate();
         });
     }
 
