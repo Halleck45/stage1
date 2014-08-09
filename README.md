@@ -3,6 +3,16 @@ STAGE1
 
 Using [Vagrant](http://vagrantup.com/):
 
+**VMware users**:
+
+    $ vagrant box add stage1/dev https://vagrantcloud.com/stage1/dev/version/1/provider/vmware_desktop.box
+
+**VirtualBox users**:
+
+    $ vagrant box add stage1/dev https://vagrantcloud.com/stage1/dev/version/1/provider/virtualbox.box
+
+**Then, everyone**:
+
     $ vagrant plugin install vagrant-hostmanager
     $ vagrant up
 
